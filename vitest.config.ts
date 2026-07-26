@@ -3,7 +3,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    setupFiles: ['./src/test-setup.ts'],
+    setupFiles: ['./test/setup.ts'],
     environment: 'happy-dom',
     coverage: {
       reporter: ['text', 'json-summary', 'json'],

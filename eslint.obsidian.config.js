@@ -29,6 +29,6 @@ export default defineConfig(
   },
   {
     // Tests are not shipped, so plugin runtime rules do not apply to them.
-    ignores: ['**/*.test.ts', 'src/test-setup.ts', 'src/icon-pack-manager/test-utils.ts'],
+    ignores: ['**/*.test.ts', 'src/icon-pack-manager/test-utils.ts'],
   },
 );

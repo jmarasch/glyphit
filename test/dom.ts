@@ -178,18 +178,43 @@ export const installObsidianDomExtensions = (): void => {
     }
   });
 
-  // The document-level and free-standing constructors Obsidian also provides.
+  // The free-standing constructors Obsidian also provides. Unlike the element
+  // methods above, these build a *detached* node — nothing is appended to the
+  // document until the caller places it.
+  const detached = (
+    tag: string,
+    info?: DomElementInfo,
+    callback?: (el: HTMLElement) => void,
+  ): HTMLElement => {
+    const el = document.createElement(tag);
+    applyInfo(el, info);
+    callback?.(el);
+    return el;
+  };
+
+  const globals: Record<string, unknown> = {
+    createEl: detached,
+    createDiv: (info?: DomElementInfo | string, cb?: (el: HTMLElement) => void) =>
+      detached('div', typeof info === 'string' ? { cls: info } : info, cb),
+    createSpan: (
+      info?: DomElementInfo | string,
+      cb?: (el: HTMLElement) => void,
+    ) => detached('span', typeof info === 'string' ? { cls: info } : info, cb),
+    createFragment: (callback?: (fragment: DocumentFragment) => void) => {
+      const fragment = document.createDocumentFragment();
+      callback?.(fragment);
+      return fragment;
+    },
+  };
+
   const doc = globalThis.document as unknown as Record<string, unknown>;
   const global = globalThis as unknown as Record<string, unknown>;
-  for (const name of ['createEl', 'createDiv', 'createSpan'] as const) {
-    const make = (...args: unknown[]) =>
-      (
-        document.body as unknown as Record<
-          string,
-          (...a: unknown[]) => HTMLElement
-        >
-      )[name](...args);
-    define(doc, name, make);
-    define(global, name, make);
+  for (const [name, fn] of Object.entries(globals)) {
+    define(doc, name, fn);
+    define(global, name, fn);
   }
+
+  // Obsidian exposes the focused window here; in tests there is only one.
+  define(global, 'activeWindow', globalThis);
+  define(global, 'activeDocument', globalThis.document);
 };
