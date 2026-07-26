@@ -1,4 +1,4 @@
-import JSZip, { loadAsync } from 'jszip';
+import { unzipSync, strFromU8 } from 'fflate';
 import { logger } from '@app/lib/logger';
 import { FileSystem } from './file-system';
 import { IconSource, RawEntry, SourceFingerprint } from './types';
@@ -6,23 +6,32 @@ import { IconSource, RawEntry, SourceFingerprint } from './types';
 /**
  * Reads icons out of a `.zip` archive without ever unpacking it to disk.
  *
- * JSZip parses only the archive directory when loading, and inflates an entry's
- * bytes lazily on `async()`. That split is what this class is built around:
- * {@link listEntries} walks thousands of names for the cost of parsing a
- * directory, while {@link readEntry} pays decompression for exactly one icon.
+ * A zip's central directory is a flat table of names and offsets at the end of
+ * the file, so it can be walked without touching the compressed bytes at all.
+ * That split is what this class is built around: {@link listEntries} reads
+ * thousands of names for the cost of walking that table, while
+ * {@link readEntry} pays decompression for exactly one icon.
  *
- * The parsed archive is held onto between calls so that a burst of reads shares
- * one parse, and released by {@link dispose} so a large pack does not sit in
- * memory for the rest of the session.
+ * `fflate`'s `filter` callback is how the two are told apart — it runs per
+ * entry during the directory walk, and returning `false` means the entry is
+ * skipped rather than inflated.
+ *
+ * Only the synchronous API is used. The asynchronous one spawns workers by
+ * building a script at runtime and handing it to a blob URL, which is exactly
+ * the pattern that makes a plugin impossible to review statically.
+ *
+ * The archive bytes are held between calls so a burst of reads shares one file
+ * read, and released by {@link dispose} so a large pack does not sit in memory
+ * for the rest of the session.
  */
 export class ZipSource implements IconSource {
   public readonly type = 'zip';
 
   /**
-   * In-flight or completed archive parse. Stored as the promise rather than the
-   * result so concurrent callers share a single read of the underlying file.
+   * In-flight or completed read of the archive. Stored as the promise rather
+   * than the result so concurrent callers share a single read of the file.
    */
-  private archive: Promise<JSZip> | null = null;
+  private archive: Promise<Uint8Array> | null = null;
 
   /**
    * @param fs File system to read the archive through.
@@ -36,13 +45,13 @@ export class ZipSource implements IconSource {
     private readonly extraPath = '',
   ) {}
 
-  private open(): Promise<JSZip> {
+  private open(): Promise<Uint8Array> {
     if (this.archive === null) {
       this.archive = this.fs
         .readBinary(this.zipPath)
-        .then((buffer) => loadAsync(buffer));
+        .then((buffer) => new Uint8Array(buffer));
 
-      // A failed parse must not be cached, otherwise every later read of a
+      // A failed read must not be cached, otherwise every later read of a
       // transiently unreadable archive fails too.
       this.archive.catch(() => {
         this.archive = null;
@@ -53,10 +62,28 @@ export class ZipSource implements IconSource {
   }
 
   /**
-   * Whether an archive entry is an SVG at all.
+   * Every entry name in the archive, without decompressing anything.
    */
-  private isSvg(file: JSZip.JSZipObject): boolean {
-    return !file.dir && file.name.toLowerCase().endsWith('.svg');
+  private listNames(bytes: Uint8Array): string[] {
+    const names: string[] = [];
+    unzipSync(bytes, {
+      filter: (file) => {
+        names.push(file.name);
+        // Never inflate: this walk only wants the directory.
+        return false;
+      },
+    });
+    return names;
+  }
+
+  /**
+   * Whether an archive entry is an SVG at all.
+   *
+   * Directory entries are recorded with a trailing slash, which is how they
+   * are told apart from files.
+   */
+  private isSvg(name: string): boolean {
+    return !name.endsWith('/') && name.toLowerCase().endsWith('.svg');
   }
 
   /**
@@ -75,30 +102,28 @@ export class ZipSource implements IconSource {
   }
 
   public async listEntries(): Promise<RawEntry[]> {
-    const archive = await this.open();
-    const svgs = Object.values(archive.files).filter((file) =>
-      this.isSvg(file),
-    );
+    const bytes = await this.open();
+    const svgs = this.listNames(bytes).filter((name) => this.isSvg(name));
 
     if (this.extraPath === '') {
-      return svgs.map((file) => ({ path: file.name }));
+      return svgs.map((path) => ({ path }));
     }
 
-    const exact = svgs.filter((file) => file.name.startsWith(this.extraPath));
+    const exact = svgs.filter((name) => name.startsWith(this.extraPath));
     if (exact.length > 0) {
-      return exact.map((file) => ({ path: file.name }));
+      return exact.map((path) => ({ path }));
     }
 
     // Nothing matched, most likely because the installed archive is a different
     // release than the one the extra path was written for.
     const relaxed = this.relaxedExtraPath();
     if (relaxed !== '') {
-      const matched = svgs.filter((file) => file.name.includes(`/${relaxed}`));
+      const matched = svgs.filter((name) => name.includes(`/${relaxed}`));
       if (matched.length > 0) {
         logger.info(
           `Matched icon pack entries in '${this.zipPath}' on relaxed path '${relaxed}' because '${this.extraPath}' matched nothing`,
         );
-        return matched.map((file) => ({ path: file.name }));
+        return matched.map((path) => ({ path }));
       }
     }
 
@@ -106,13 +131,16 @@ export class ZipSource implements IconSource {
   }
 
   public async readEntry(path: string): Promise<string | null> {
-    const archive = await this.open();
-    const file = archive.file(path);
-    if (!file) {
-      return null;
-    }
+    const bytes = await this.open();
 
-    return file.async('string');
+    // The filter means only this one entry is inflated, however many the
+    // archive holds.
+    const unzipped = unzipSync(bytes, {
+      filter: (file) => file.name === path,
+    });
+
+    const entry = unzipped[path];
+    return entry ? strFromU8(entry) : null;
   }
 
   public async fingerprint(): Promise<SourceFingerprint> {
