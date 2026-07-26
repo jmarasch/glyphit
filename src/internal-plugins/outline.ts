@@ -136,7 +136,7 @@ export default class OutlineInternalPlugin extends InternalPluginInjector {
 
     if (requireApiVersion('1.7.2')) {
       // TODO: Might improve the performance here.
-      this.leaf.loadIfDeferred().then(setOutlineIcons);
+      void this.leaf.loadIfDeferred().then(setOutlineIcons);
     } else {
       setOutlineIcons();
     }

@@ -212,7 +212,11 @@ export default class GlyphItPlugin extends Plugin {
                 for (const tabLeaf of tabLeaves) {
                   // Add timeout to ensure that the default icon is already set.
                   setTimeout(() => {
-                    iconTabs.add(this, file.path, tabLeaf.tabHeaderInnerIconEl);
+                    void iconTabs.add(
+                      this,
+                      file.path,
+                      tabLeaf.tabHeaderInnerIconEl,
+                    );
                   }, 5);
                 }
               }
@@ -355,11 +359,11 @@ export default class GlyphItPlugin extends Plugin {
     for (const rule of customRule.getSortedRules(this)) {
       const applicable = await customRule.isApplicable(this, rule, file.path);
       if (applicable) {
-        customRule.add(this, rule, file);
+        await customRule.add(this, rule, file);
         this.addIconInTitle(rule.icon);
         const tabLeaves = iconTabs.getTabLeavesOfFilePath(this, file.path);
         for (const tabLeaf of tabLeaves) {
-          iconTabs.add(this, file.path, tabLeaf.tabHeaderInnerIconEl, {
+          await iconTabs.add(this, file.path, tabLeaf.tabHeaderInnerIconEl, {
             iconName: rule.icon,
           });
         }
@@ -462,13 +466,13 @@ export default class GlyphItPlugin extends Plugin {
           });
 
           // Adds possible icons to the renamed file.
-          sortedRules.forEach((rule) => {
+          for (const rule of sortedRules) {
             if (customRule.doesMatchPath(rule, oldPath)) {
-              return;
+              continue;
             }
 
-            customRule.add(this, rule, file, undefined);
-          });
+            await customRule.add(this, rule, file, undefined);
+          }
 
           // Updates icon tabs for the renamed file.
           for (const rule of customRule.getSortedRules(this)) {
@@ -537,9 +541,16 @@ export default class GlyphItPlugin extends Plugin {
           for (const openedFile of getAllOpenedFiles(this)) {
             const leaf = openedFile.leaf as TabHeaderLeaf;
             const iconColor = this.getIconColor(leaf.view.file.path);
-            iconTabs.add(this, openedFile.path, leaf.tabHeaderInnerIconEl, {
-              iconColor,
-            });
+            // A workspace event handler cannot be awaited; the tab decorates
+            // itself once the icon resolves.
+            void iconTabs.add(
+              this,
+              openedFile.path,
+              leaf.tabHeaderInnerIconEl,
+              {
+                iconColor,
+              },
+            );
           }
         }),
       );
@@ -696,9 +707,14 @@ export default class GlyphItPlugin extends Plugin {
             for (const openedFile of getAllOpenedFiles(this)) {
               const leaf = openedFile.leaf as TabHeaderLeaf;
               const iconColor = this.getIconColor(leaf.view.file.path);
-              iconTabs.add(this, openedFile.path, leaf.tabHeaderInnerIconEl, {
-                iconColor,
-              });
+              void iconTabs.add(
+                this,
+                openedFile.path,
+                leaf.tabHeaderInnerIconEl,
+                {
+                  iconColor,
+                },
+              );
             }
             return;
           }
@@ -710,7 +726,7 @@ export default class GlyphItPlugin extends Plugin {
           const tabHeaderLeaf = leaf as TabHeaderLeaf;
           if (tabHeaderLeaf.view.file) {
             const iconColor = this.getIconColor(tabHeaderLeaf.view.file.path);
-            iconTabs.add(
+            void iconTabs.add(
               this,
               tabHeaderLeaf.view.file.path,
               tabHeaderLeaf.tabHeaderInnerIconEl,
@@ -770,7 +786,7 @@ export default class GlyphItPlugin extends Plugin {
       Object.getOwnPropertyDescriptor(this.data, oldPath),
     );
     delete this.data[oldPath];
-    this.savePluginData();
+    void this.savePluginData();
   }
 
   addIconColor(path: string, iconColor: string): void {
@@ -785,7 +801,7 @@ export default class GlyphItPlugin extends Plugin {
       (pathData as FolderIconObject).iconColor = iconColor;
     }
 
-    this.savePluginData();
+    void this.savePluginData();
   }
 
   addIconBackgroundColor(path: string, iconBackgroundColor: string): void {
@@ -800,7 +816,7 @@ export default class GlyphItPlugin extends Plugin {
       (pathData as FolderIconObject).iconBackgroundColor = iconBackgroundColor;
     }
 
-    this.savePluginData();
+    void this.savePluginData();
   }
 
   getIconBackgroundColor(path: string): string | undefined {
@@ -821,7 +837,7 @@ export default class GlyphItPlugin extends Plugin {
     }
 
     delete (pathData as FolderIconObject).iconBackgroundColor;
-    this.savePluginData();
+    void this.savePluginData();
   }
 
   getIconColor(path: string): string | undefined {
@@ -848,7 +864,7 @@ export default class GlyphItPlugin extends Plugin {
     const currentValue = pathData as FolderIconObject;
     this.getData()[path] = currentValue.iconName;
 
-    this.savePluginData();
+    void this.savePluginData();
   }
 
   removeFolderIcon(path: string): void {
@@ -877,7 +893,7 @@ export default class GlyphItPlugin extends Plugin {
     }
 
     //this.addIconsToSearch();
-    this.savePluginData();
+    void this.savePluginData();
   }
 
   addFolderIcon(path: string, icon: Icon | string): void {
@@ -901,11 +917,11 @@ export default class GlyphItPlugin extends Plugin {
       }
 
       this.getSettings().recentlyUsedIcons.unshift(iconName);
-      this.checkRecentlyUsedIcons();
+      void this.checkRecentlyUsedIcons();
     }
 
     //this.addIconsToSearch();
-    this.savePluginData();
+    void this.savePluginData();
   }
 
   public getSettings(): GlyphItSettings {

@@ -93,7 +93,9 @@ export default class StarredInternalPlugin extends InternalPluginInjector {
       return;
     }
 
-    // eslint-disable-next-line
+    // The patches below are plain `function` expressions so `this` stays bound to the
+    // internal plugin instance; the alias is how they reach back to us.
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- see comment above
     const self = this;
     this.plugin.register(
       around(this.starred.instance, {

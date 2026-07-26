@@ -21,13 +21,13 @@ export default class EmojiStyleSetting extends GlyphItSetting {
       dropdown.setValue(this.plugin.getSettings().emojiStyle);
       dropdown.onChange(async (value: 'native' | 'twemoji') => {
         this.plugin.getSettings().emojiStyle = value;
-        this.updateDOM();
+        await this.updateDOM();
         await this.plugin.savePluginData();
       });
     });
   }
 
-  private updateDOM(): void {
+  private async updateDOM(): Promise<void> {
     for (const fileExplorer of this.plugin.getRegisteredFileExplorers()) {
       const fileItems = Object.entries(fileExplorer.fileItems || {});
       for (const [path, _] of fileItems) {
@@ -79,7 +79,7 @@ export default class EmojiStyleSetting extends GlyphItSetting {
     }
 
     for (const rule of customRule.getSortedRules(this.plugin)) {
-      customRule.addToAllFiles(this.plugin, rule);
+      await customRule.addToAllFiles(this.plugin, rule);
     }
   }
 }

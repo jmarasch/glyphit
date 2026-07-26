@@ -37,7 +37,7 @@ export class ZipSource implements IconSource {
   ) {}
 
   private open(): Promise<JSZip> {
-    if (!this.archive) {
+    if (this.archive === null) {
       this.archive = this.fs
         .readBinary(this.zipPath)
         .then((buffer) => loadAsync(buffer));

@@ -21,7 +21,7 @@ interface UpdateLeavesOptions {
 }
 
 export default class ToggleIconInTitle extends GlyphItSetting {
-  private dropdown: DropdownComponent;
+  private dropdown?: DropdownComponent;
 
   private updateLeaves(options: UpdateLeavesOptions): void {
     this.plugin.app.workspace.getLeavesOfType('markdown').forEach((leaf) => {
@@ -71,7 +71,9 @@ export default class ToggleIconInTitle extends GlyphItSetting {
         toggle
           .setValue(this.plugin.getSettings().iconInTitleEnabled)
           .onChange(async (enabled) => {
-            if (this.dropdown) {
+            // Obsidian components expose a chaining `then`, so an existence
+            // check has to be explicit rather than truthiness.
+            if (this.dropdown !== undefined) {
               this.dropdown.setDisabled(!enabled);
             }
 

@@ -137,7 +137,7 @@ export default class BookmarkInternalPlugin extends InternalPluginInjector {
 
     if (requireApiVersion('1.7.2')) {
       // TODO: Might improve the performance here.
-      this.leaf?.loadIfDeferred().then(setBookmarkIcon);
+      void this.leaf?.loadIfDeferred().then(setBookmarkIcon);
     } else {
       setBookmarkIcon();
     }
@@ -160,7 +160,9 @@ export default class BookmarkInternalPlugin extends InternalPluginInjector {
       return;
     }
 
-    // eslint-disable-next-line
+    // The patches below are plain `function` expressions so `this` stays bound to the
+    // internal plugin instance; the alias is how they reach back to us.
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- see comment above
     const self = this;
     this.plugin.register(
       around(this.bookmark.instance, {

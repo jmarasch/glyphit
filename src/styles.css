@@ -108,11 +108,9 @@
   justify-content: center;
 }
 
-/* Custom rule modal. */
+/* Custom rule modal. Stacked, because it is a form rather than a picker. */
 .glyphit-custom-modal .modal-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
 }
 
 .glyphit-custom-modal .modal-content input {
@@ -319,4 +317,46 @@
 .glyphit-destructive .setting-item-description {
   color: var(--text-error);
   opacity: 0.85;
+}
+
+/* Controls disabled because a prerequisite field has not been filled in. */
+.glyphit-unavailable {
+  cursor: not-allowed;
+  opacity: 50%;
+}
+
+/* Custom rule settings and the edit-rule modal. */
+.glyphit-rule-description {
+  margin-bottom: var(--size-2-2);
+}
+
+/* A label on the left, its control on the right. */
+.glyphit-rule-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.glyphit-rule-field.glyphit-rule-field-spaced {
+  margin-top: var(--size-4-5);
+}
+
+.glyphit-rule-field .setting-item-description {
+  margin: 0 0 var(--size-2-2) 0;
+}
+
+.glyphit-rule-icon-preview svg,
+.glyphit-rule-icon-preview img {
+  width: 20px;
+  height: 20px;
+}
+
+.glyphit-rule-icon-name {
+  padding-top: 0;
+  margin-left: var(--size-2-2);
+}
+
+.glyphit-rule-save {
+  margin-top: var(--size-4-4);
+  float: right;
 }

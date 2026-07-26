@@ -352,7 +352,7 @@ export default class CustomIconPackSetting extends GlyphItSetting {
       });
       iconPackSetting.settingEl.addEventListener(
         'drop',
-        async (event) => {
+        (event) => {
           const dropped = Array.from(event.dataTransfer.files);
           const svgs = dropped.filter((file) => {
             if (file.type === 'image/svg+xml') {
@@ -366,9 +366,12 @@ export default class CustomIconPackSetting extends GlyphItSetting {
             return;
           }
 
-          const added = await this.addIcons(iconPack, svgs);
-          iconPackSetting.setDesc(describe(` (added: ${added})`));
-          new Notice(`${added} icon(s) successfully added.`);
+          // A drop listener cannot be awaited, so the work is deliberately
+          // detached; failures surface as a notice rather than a rejection.
+          void this.addIcons(iconPack, svgs).then((added) => {
+            iconPackSetting.setDesc(describe(` (added: ${added})`));
+            new Notice(`${added} icon(s) successfully added.`);
+          });
         },
         false,
       );

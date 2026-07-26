@@ -177,7 +177,7 @@ const addAll = (
 
     if (requireApiVersion('1.7.2')) {
       // TODO: Remove loading deferred view to improve performance.
-      fileExplorer.loadIfDeferred().then(setIcons);
+      void fileExplorer.loadIfDeferred().then(setIcons);
     } else {
       setIcons();
     }
@@ -185,7 +185,7 @@ const addAll = (
 
   // Handles the custom rules.
   for (const rule of customRule.getSortedRules(plugin)) {
-    customRule.addToAllFiles(plugin, rule);
+    void customRule.addToAllFiles(plugin, rule);
   }
 };
 

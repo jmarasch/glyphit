@@ -6,9 +6,8 @@ import migrate0004 from './0004-remove-none-emoji-option';
 import migrate0005 from './0005-remove-downloaded-lucide-icon-pack';
 
 export const migrate = async (plugin: GlyphItPlugin): Promise<void> => {
-  // eslint-disable-next-line
-  // @ts-ignore - Required because an older version of the plugin saved the `migrated`
-  // property as a boolean instead of a number.
+  // @ts-expect-error - Required because an older version of the plugin saved the
+  // `migrated` property as a boolean instead of a number.
   if (plugin.getSettings().migrated === true) {
     plugin.getSettings().migrated = 1;
   }

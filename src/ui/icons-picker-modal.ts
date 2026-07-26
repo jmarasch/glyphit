@@ -13,6 +13,7 @@ import svg from '@app/lib/util/svg';
 import { saveIconToIconPack } from '@app/util';
 import { getSvgFromLoadedIcon } from '@app/icon-pack-manager/util';
 import { logger } from '@app/lib/logger';
+import { errorMessage } from '@app/lib/util/error';
 import { ColorField } from './color-field';
 import {
   PickerItem,
@@ -451,12 +452,14 @@ export default class IconsPickerModal extends Modal {
     try {
       this.commit(item);
     } catch (error) {
-      logger.error(`Could not apply icon '${item.id}' (${error})`);
-      new Notice(`Could not apply ${item.label}: ${error?.message ?? error}`);
+      const message = errorMessage(error);
+      logger.error(`Could not apply icon '${item.id}' (${message})`);
+      new Notice(`Could not apply ${item.label}: ${message}`);
       return;
     }
 
-    this.onChooseItem(item);
+    // Handlers may be async; the modal closes without waiting on them.
+    void this.onChooseItem(item);
     this.onSelect?.(item.id);
     this.close();
   }
@@ -498,6 +501,5 @@ export default class IconsPickerModal extends Modal {
   /**
    * Hook for callers that need the chosen row rather than just its identifier.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public onChooseItem(_item: PickerItem): void {}
+  public onChooseItem(_item: PickerItem): void | Promise<void> {}
 }

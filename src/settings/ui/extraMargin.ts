@@ -34,7 +34,7 @@ export default class ExtraMarginSetting extends GlyphItSetting {
           };
         }
         await this.plugin.savePluginData();
-        helper.refreshStyleOfIcons(this.plugin);
+        await helper.refreshStyleOfIcons(this.plugin);
       });
 
     extraMarginDropdown.onChange((val: keyof ExtraMarginSettings) => {

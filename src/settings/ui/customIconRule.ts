@@ -21,7 +21,6 @@ import { CustomRule } from '../data';
 import customRule from '@lib/custom-rule';
 import iconTabs from '@lib/icon-tabs';
 import dom from '@lib/util/dom';
-import svg from '@lib/util/svg';
 import { TabHeaderLeaf } from '@app/@types/obsidian';
 import emoji from '@app/emoji';
 import { getNormalizedName } from '@app/icon-pack-manager/util';
@@ -74,7 +73,7 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
             replaceWithDefaultIcon: true,
           });
         } else {
-          iconTabs.add(
+          await iconTabs.add(
             this.plugin,
             openedFile.path,
             leaf.tabHeaderInnerIconEl,
@@ -89,11 +88,10 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
   }
 
   private createDescriptionEl(container: HTMLElement, text: string): void {
-    const description = container.createEl('p', {
+    container.createEl('p', {
       text,
-      cls: 'setting-item-description',
+      cls: 'setting-item-description glyphit-rule-description',
     });
-    description.style.marginBottom = 'var(--size-2-2)';
   }
 
   public display(): void {
@@ -104,11 +102,12 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
       )
       .addText((text) => {
         text.onChange((value) => {
-          this.chooseIconBtn.setDisabled(value.length === 0);
-          this.chooseIconBtn.buttonEl.style.cursor =
-            value.length === 0 ? 'not-allowed' : 'default';
-          this.chooseIconBtn.buttonEl.style.opacity =
-            value.length === 0 ? '50%' : '100%';
+          const unavailable = value.length === 0;
+          this.chooseIconBtn.setDisabled(unavailable);
+          this.chooseIconBtn.buttonEl.toggleClass(
+            'glyphit-unavailable',
+            unavailable,
+          );
         });
         text.setPlaceholder('regex or simple string');
         this.textComponent = text;
@@ -147,7 +146,7 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
             saveIconToIconPack(this.plugin, rule.icon);
 
             await customRule.addToAllFiles(this.plugin, rule);
-            this.updateIconTabs(rule, false);
+            await this.updateIconTabs(rule, false);
           };
           modal.open();
         });
@@ -184,9 +183,9 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
           const files = Object.values(fileExplorer.fileItems || {});
           for (const rule of customRule.getSortedRules(this.plugin)) {
             // Removes the icon tabs from all opened files.
-            this.updateIconTabs(rule, true, addedPaths);
+            await this.updateIconTabs(rule, true, addedPaths);
             // Adds the icon tabs to all opened files.
-            this.updateIconTabs(rule, false, addedPaths);
+            await this.updateIconTabs(rule, false, addedPaths);
 
             for (const fileItem of files) {
               if (addedPaths.includes(fileItem.file.path)) {
@@ -213,10 +212,7 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
       settingRuleEl.addExtraButton((btn) => {
         const isFirstOrder = currentOrder === 0;
         btn.setDisabled(isFirstOrder);
-        btn.extraSettingsEl.style.cursor = isFirstOrder
-          ? 'not-allowed'
-          : 'default';
-        btn.extraSettingsEl.style.opacity = isFirstOrder ? '50%' : '100%';
+        btn.extraSettingsEl.toggleClass('glyphit-unavailable', isFirstOrder);
         btn.setIcon('arrow-up');
         btn.setTooltip('Prioritize the custom rule');
         btn.onClick(async () => {
@@ -229,10 +225,7 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
         const isLastOrder =
           currentOrder === this.plugin.getSettings().rules.length - 1;
         btn.setDisabled(isLastOrder);
-        btn.extraSettingsEl.style.cursor = isLastOrder
-          ? 'not-allowed'
-          : 'default';
-        btn.extraSettingsEl.style.opacity = isLastOrder ? '50%' : '100%';
+        btn.extraSettingsEl.toggleClass('glyphit-unavailable', isLastOrder);
         btn.setIcon('arrow-down');
         btn.setTooltip('Deprioritize the custom rule');
         btn.onClick(async () => {
@@ -247,8 +240,7 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
         btn.onClick(() => {
           // Create modal and its children elements.
           const modal = new Modal(this.plugin.app);
-          modal.contentEl.style.display = 'block';
-          modal.modalEl.classList.add('glyphit-custom-modal');
+          modal.modalEl.addClass('glyphit-custom-modal');
           modal.titleEl.setText('Edit custom rule');
 
           // Create the input for the rule.
@@ -259,17 +251,13 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
             rule.rule = value;
           });
 
-          const useFilePathContainer = modal.contentEl.createDiv();
-          useFilePathContainer.style.display = 'flex';
-          useFilePathContainer.style.alignItems = 'center';
-          useFilePathContainer.style.justifyContent = 'space-between';
-          useFilePathContainer.style.marginTop = 'var(--size-4-5)';
-          const useFilePathDescription = useFilePathContainer.createEl('p', {
+          const useFilePathContainer = modal.contentEl.createDiv({
+            cls: 'glyphit-rule-field glyphit-rule-field-spaced',
+          });
+          useFilePathContainer.createEl('p', {
             text: 'Include folders and files that are part of the path.',
             cls: 'setting-item-description',
           });
-          useFilePathDescription.style.margin = '0';
-          useFilePathDescription.style.marginBottom = 'var(--size-2-2)';
           new ToggleComponent(useFilePathContainer)
             .setValue(rule.useFilePath === true)
             .onChange((value) => {
@@ -277,17 +265,13 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
             });
 
           // Create the toggle for changing the rule type.
-          const ruleTypeContainer = modal.contentEl.createDiv();
-          ruleTypeContainer.style.display = 'flex';
-          ruleTypeContainer.style.alignItems = 'center';
-          ruleTypeContainer.style.justifyContent = 'space-between';
-          ruleTypeContainer.style.marginTop = 'var(--size-4-5)';
-          const ruleTypeDescription = ruleTypeContainer.createEl('p', {
+          const ruleTypeContainer = modal.contentEl.createDiv({
+            cls: 'glyphit-rule-field glyphit-rule-field-spaced',
+          });
+          ruleTypeContainer.createEl('p', {
             text: 'Where the custom rule gets applied to.',
             cls: 'setting-item-description',
           });
-          ruleTypeDescription.style.margin = '0';
-          ruleTypeDescription.style.marginBottom = 'var(--size-2-2)';
           const ruleTypeButton = new ButtonComponent(ruleTypeContainer);
           const setButtonContent = (isFor: typeof rule.for) => {
             if (isFor === 'folders') {
@@ -302,7 +286,7 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
           setButtonContent(rule.for ?? 'everything');
           ruleTypeButton.onClick(async () => {
             const isFor: typeof rule.for = rule.for ?? 'everything';
-            this.updateIconTabs(rule, true);
+            await this.updateIconTabs(rule, true);
             await customRule.removeFromAllFiles(this.plugin, {
               ...rule,
               for: isFor,
@@ -321,27 +305,20 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
 
           // Create the change icon button with icon preview.
           this.createDescriptionEl(modal.contentEl, 'Custom rule icon');
-          const iconContainer = modal.contentEl.createDiv();
-          iconContainer.style.display = 'flex';
-          iconContainer.style.alignItems = 'center';
-          iconContainer.style.justifyContent = 'space-between';
-          const iconEl = iconContainer.createDiv();
-          const iconPreviewEl = iconEl.createDiv();
-          dom.setIconForNode(this.plugin, rule.icon, iconPreviewEl);
-          iconEl.style.display = 'flex';
-          iconEl.style.alignItems = 'center';
-          iconEl.style.justifyContent = 'space-between';
-          iconEl.style.margin = null;
-          iconPreviewEl.innerHTML = svg.setFontSize(
-            iconPreviewEl.innerHTML,
-            20,
-          );
-          const iconNameEl = iconEl.createEl('div', {
-            cls: 'setting-item-description',
+          const iconContainer = modal.contentEl.createDiv({
+            cls: 'glyphit-rule-field',
           });
-          iconNameEl.style.paddingTop = '0';
-          iconNameEl.style.marginLeft = 'var(--size-2-2)';
-          iconNameEl.innerText = rule.icon;
+          const iconEl = iconContainer.createDiv({ cls: 'glyphit-rule-field' });
+          // Sized by `.glyphit-rule-icon-preview` rather than by rewriting the
+          // SVG markup, so nothing has to be re-parsed to change it.
+          const iconPreviewEl = iconEl.createDiv({
+            cls: 'glyphit-rule-icon-preview',
+          });
+          dom.setIconForNode(this.plugin, rule.icon, iconPreviewEl);
+          const iconNameEl = iconEl.createDiv({
+            cls: 'setting-item-description glyphit-rule-icon-name',
+            text: rule.icon,
+          });
 
           const changeIconBtn = new ButtonComponent(iconContainer);
           changeIconBtn.setButtonText('Change icon');
@@ -353,25 +330,20 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
             );
             modal.commitToPath = false;
             modal.initialIcon = rule.icon;
-            modal.onChooseItem = async (item) => {
+            modal.onChooseItem = (item) => {
               const icon = typeof item === 'object' ? item.id : item;
               rule.icon = icon;
               dom.setIconForNode(this.plugin, rule.icon, iconPreviewEl);
-              iconPreviewEl.innerHTML = svg.setFontSize(
-                iconPreviewEl.innerHTML,
-                20,
-              );
-              iconNameEl.innerText = getNormalizedName(rule.icon);
+              iconNameEl.setText(getNormalizedName(rule.icon));
             };
             modal.open();
           });
 
           // Create the color picker for the rule.
           this.createDescriptionEl(modal.contentEl, 'Color of the icon');
-          const colorContainer = modal.contentEl.createDiv();
-          colorContainer.style.display = 'flex';
-          colorContainer.style.alignItems = 'center';
-          colorContainer.style.justifyContent = 'space-between';
+          const colorContainer = modal.contentEl.createDiv({
+            cls: 'glyphit-rule-field',
+          });
           const colorPicker = new ColorComponent(colorContainer)
             .setValue(rule.color ?? '#000000')
             .onChange((value) => {
@@ -387,9 +359,8 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
 
           // Create the save button.
           const button = new ButtonComponent(modal.contentEl);
-          button.buttonEl.style.marginTop = 'var(--size-4-4)';
-          button.buttonEl.style.float = 'right';
-          button.setButtonText('Save Changes');
+          button.buttonEl.addClass('glyphit-rule-save');
+          button.setButtonText('Save changes');
           button.onClick(async () => {
             if (!emoji.isEmoji(oldRule.icon)) {
               // Tries to remove the previously used icon from the icon pack.
@@ -407,11 +378,11 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
 
             // Refresh the DOM.
             await customRule.removeFromAllFiles(this.plugin, oldRule);
-            this.updateIconTabs(rule, true);
-            this.plugin.getSettings().rules.forEach(async (rule) => {
-              await customRule.addToAllFiles(this.plugin, rule);
-              this.updateIconTabs(rule, false);
-            });
+            await this.updateIconTabs(rule, true);
+            for (const savedRule of this.plugin.getSettings().rules) {
+              await customRule.addToAllFiles(this.plugin, savedRule);
+              await this.updateIconTabs(savedRule, false);
+            }
 
             await this.plugin.savePluginData();
             modal.close();
@@ -448,14 +419,14 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
 
           removeIconFromIconPack(this.plugin, rule.icon);
 
-          this.updateIconTabs(rule, true);
+          await this.updateIconTabs(rule, true);
           const previousRules = this.plugin
             .getSettings()
             .rules.filter((r) => rule.for === r.for);
-          previousRules.forEach(async (previousRule) => {
+          for (const previousRule of previousRules) {
             await customRule.addToAllFiles(this.plugin, previousRule);
-            this.updateIconTabs(previousRule, false);
-          });
+            await this.updateIconTabs(previousRule, false);
+          }
         });
       });
     });

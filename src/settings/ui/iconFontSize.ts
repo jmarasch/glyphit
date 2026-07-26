@@ -35,7 +35,7 @@ export default class IconFontSizeSetting extends GlyphItSetting {
           this.plugin.getSettings().fontSize = val;
           await this.plugin.savePluginData();
 
-          helper.refreshStyleOfIcons(this.plugin);
+          await helper.refreshStyleOfIcons(this.plugin);
         });
     });
   }

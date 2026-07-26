@@ -17,7 +17,7 @@ export default class IconColorSetting extends GlyphItSetting {
       this.plugin.getSettings().iconColor = null;
       // Custom saving to not save the color black in the data.
       await this.plugin.savePluginData();
-      helper.refreshStyleOfIcons(this.plugin);
+      await helper.refreshStyleOfIcons(this.plugin);
     });
 
     const colorPicker = new ColorComponent(setting.controlEl)
@@ -26,7 +26,7 @@ export default class IconColorSetting extends GlyphItSetting {
         this.plugin.getSettings().iconColor = value;
         await this.plugin.savePluginData();
 
-        helper.refreshStyleOfIcons(this.plugin);
+        await helper.refreshStyleOfIcons(this.plugin);
       });
   }
 }

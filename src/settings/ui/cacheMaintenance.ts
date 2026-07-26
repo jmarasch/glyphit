@@ -46,8 +46,9 @@ export default class CacheMaintenanceSetting extends GlyphItSetting {
 
     const { referenced, filesScanned, durationMs } = await collectAllUsedIcons(
       this.plugin,
-      (scanned, total) =>
-        setting.setDesc(`Scanning notes... ${scanned} of ${total}`),
+      (scanned, total) => {
+        setting.setDesc(`Scanning notes... ${scanned} of ${total}`);
+      },
     );
 
     // Cache entries are grouped by icon rather than by color, so every color

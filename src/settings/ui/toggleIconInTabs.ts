@@ -16,25 +16,27 @@ export default class ToggleIconInTabs extends GlyphItSetting {
             await this.plugin.savePluginData();
 
             // Updates the already opened files.
-            this.plugin.app.workspace
-              .getLeavesOfType('markdown')
-              .forEach((leaf) => {
-                const file = leaf.view.file;
-                if (file) {
-                  const tabHeaderLeaf = leaf as TabHeaderLeaf;
-                  if (enabled) {
-                    // Adds the icons to already opened files.
-                    iconTabs.add(
-                      this.plugin,
-                      file.path,
-                      tabHeaderLeaf.tabHeaderInnerIconEl,
-                    );
-                  } else {
-                    // Removes the icons from already opened files.
-                    iconTabs.remove(tabHeaderLeaf.tabHeaderInnerIconEl);
-                  }
-                }
-              });
+            const leaves =
+              this.plugin.app.workspace.getLeavesOfType('markdown');
+            for (const leaf of leaves) {
+              const file = leaf.view.file;
+              if (!file) {
+                continue;
+              }
+
+              const tabHeaderLeaf = leaf as TabHeaderLeaf;
+              if (enabled) {
+                // Adds the icons to already opened files.
+                await iconTabs.add(
+                  this.plugin,
+                  file.path,
+                  tabHeaderLeaf.tabHeaderInnerIconEl,
+                );
+              } else {
+                // Removes the icons from already opened files.
+                iconTabs.remove(tabHeaderLeaf.tabHeaderInnerIconEl);
+              }
+            }
           });
       });
   }

@@ -4,6 +4,7 @@ import { logger } from '@app/lib/logger';
 import { CatalogPack, loadCatalog } from '@app/icon-pack-manager/catalog';
 import { loadPackArchive } from '@app/icon-pack-manager/pack-archive';
 import { generatePrefix } from '@app/icon-pack-manager/naming';
+import { errorMessage } from '@app/lib/util/error';
 
 /**
  * Browses the icon packs available to download.
@@ -25,12 +26,20 @@ export default class IconPackBrowserModal extends FuzzySuggestModal<CatalogPack>
     this.inputEl.disabled = true;
   }
 
-  // eslint-disable-next-line
   onAddedIconPack(): void {}
 
-  async onOpen(): Promise<void> {
-    super.onOpen();
+  onOpen(): void {
+    void super.onOpen();
+    void this.loadPacks();
+  }
 
+  /**
+   * Fetches the catalog and re-runs the search once it lands.
+   *
+   * Detached from `onOpen` so the modal paints immediately instead of waiting
+   * on the network.
+   */
+  private async loadPacks(): Promise<void> {
     this.packs = await loadCatalog();
     this.inputEl.disabled = false;
     this.inputEl.placeholder = 'Select an icon pack to download';
@@ -58,7 +67,14 @@ export default class IconPackBrowserModal extends FuzzySuggestModal<CatalogPack>
     return this.packs.filter((pack) => !installed.has(pack.id));
   }
 
-  async onChooseItem(item: CatalogPack): Promise<void> {
+  onChooseItem(item: CatalogPack): void {
+    void this.download(item);
+  }
+
+  /**
+   * Downloads and registers a pack, reporting progress through notices.
+   */
+  private async download(item: CatalogPack): Promise<void> {
     const notice = new Notice(`Downloading ${item.name}...`, 0);
 
     try {
@@ -83,11 +99,9 @@ export default class IconPackBrowserModal extends FuzzySuggestModal<CatalogPack>
       this.onAddedIconPack();
     } catch (error) {
       notice.hide();
-      logger.error(`Could not add icon pack '${item.id}' (${error})`);
-      new Notice(
-        `Could not add ${item.name}: ${error?.message ?? error}`,
-        10000,
-      );
+      const message = errorMessage(error);
+      logger.error(`Could not add icon pack '${item.id}' (${message})`);
+      new Notice(`Could not add ${item.name}: ${message}`, 10000);
     }
   }
 
