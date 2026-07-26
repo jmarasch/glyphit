@@ -151,7 +151,7 @@ export default class GlyphItPlugin extends Plugin {
     this.app.workspace.onLayoutReady(() => this.handleChangeLayout());
 
     this.addCommand({
-      id: 'glyphit:set-icon-for-file',
+      id: 'set-icon-for-file',
       name: 'Set icon for file',
       hotkeys: [
         {

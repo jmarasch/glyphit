@@ -7,10 +7,6 @@ import { LucideIconPackType } from '../data';
 import { LUCIDE_ICON_PACK_NAME } from '@app/icon-pack-manager/lucide';
 import { IconPack } from '@app/icon-pack-manager';
 import { IconPackSourceType } from '@app/icon-pack-manager/types';
-import {
-  revealInFileBrowser,
-  canRevealInFileBrowser,
-} from '@app/lib/util/reveal';
 
 export default class CustomIconPackSetting extends GlyphItSetting {
   private textComponent: TextComponent;
@@ -222,27 +218,6 @@ export default class CustomIconPackSetting extends GlyphItSetting {
           new Notice(`${iconPack.getName()}: ${count} icons.`);
         });
       });
-      // Icon packs are meant to be edited outside the app, and they live in a
-      // hidden directory that is awkward to reach by hand.
-      if (canRevealInFileBrowser(this.plugin.app)) {
-        iconPackSetting.addButton((btn) => {
-          btn.setIcon('folder-open');
-          btn.setTooltip(
-            iconPack.getSource().type === 'zip'
-              ? 'Show this icon pack archive in the file browser'
-              : 'Show this icon pack folder in the file browser',
-          );
-          btn.onClick(() => {
-            const location = this.plugin
-              .getIconPackManager()
-              .getPackLocation(iconPack);
-
-            if (!revealInFileBrowser(this.plugin.app, location)) {
-              new Notice('Could not open the file browser.');
-            }
-          });
-        });
-      }
 
       // iconPackSetting.addButton((btn) => {
       //   btn.setIcon('broken-link');
