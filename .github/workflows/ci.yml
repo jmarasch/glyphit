@@ -16,6 +16,12 @@ jobs:
           node-version: '20'
           cache: npm
 
+      # One devDependency is a git dependency (Obsidian's CodeMirror fork).
+      # npm always records it in the lockfile as git+ssh, and a runner has no
+      # SSH key, so the clone fails. Rewriting the protocol lets it use HTTPS.
+      - name: Use HTTPS for git dependencies
+        run: git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+
       - run: npm ci
 
       - name: Typecheck

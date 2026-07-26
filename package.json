@@ -26,7 +26,7 @@
   "author": "jmarasch",
   "license": "MIT",
   "devDependencies": {
-    "@codemirror/language": "https://github.com/lishid/cm-language",
+    "@codemirror/language": "git+https://github.com/lishid/cm-language.git#2644bfc27afda707a7e1f3aedaf3ca7120f63cd9",
     "@codemirror/state": "^6.4.1",
     "@codemirror/view": "^6.26.0",
     "@eslint/js": "^9.39.2",
