@@ -1,0 +1,89 @@
+import GlyphItPlugin from '@app/main';
+import dom from '@lib/util/dom';
+import svg from '@lib/util/svg';
+import icon from '@lib/icon';
+import { EventEmitter } from './event/event';
+import { removeIconFromIconPack, saveIconToIconPack } from '@app/util';
+import { Icon } from '@app/icon-pack-manager';
+import { IconPack } from '@app/icon-pack-manager/icon-pack';
+
+export { AllIconsLoadedEvent } from '@lib/event/events';
+
+export default interface GlyphItAPI {
+  getEventEmitter(): EventEmitter;
+  getIconByName(iconNameWithPrefix: string): Icon | null;
+  /**
+   * Returns the {@link Icon} or emoji as string for the given path.
+   * @param path String which is the path to get the icon of.
+   * @returns Icon or Emoji as string if it exists, `null` otherwise.
+   */
+  getIconByPath(path: string): Icon | string | null;
+  /**
+   * Gets the icon name or emoji of a given path. This function returns the first occurrence of an icon.
+   * @param path Path to get the icon of.
+   * @returns The icon name or emoji of the path if it exists, undefined otherwise.
+   */
+  getIconNameByPath(path: string): string | undefined;
+  /**
+   * Sets an icon or emoji for an HTMLElement based on the specified icon name and color.
+   * The function manipulates the specified node inline.
+   * @param iconName Name of the icon or emoji to add.
+   * @param node HTMLElement to which the icon or emoji will be added.
+   * @param color Optional color of the icon to add.
+   */
+  setIconForNode(iconName: string, node: HTMLElement, color?: string): void;
+  doesElementHasIconNode: typeof dom.doesElementHasIconNode;
+  getIconFromElement: typeof dom.getIconFromElement;
+  removeIconInNode: typeof dom.removeIconInNode;
+  removeIconInPath: typeof dom.removeIconInPath;
+  /**
+   * Will add the icon to the icon pack and then extract the icon to the icon pack.
+   * @param iconNameWithPrefix String that will be used to add the icon to the icon pack.
+   */
+  saveIconToIconPack(iconNameWithPrefix: string): void;
+  /**
+   * Will remove the icon from the icon pack by removing the icon file from the icon pack directory.
+   * @param iconNameWithPrefix String that will be used to remove the icon from the icon pack.
+   */
+  removeIconFromIconPack(iconNameWithPrefix: string): void;
+  getIconPacks(): IconPack[];
+  util: {
+    dom: typeof dom;
+    svg: typeof svg;
+  };
+  version: {
+    current: string;
+  };
+}
+
+export function getApi(plugin: GlyphItPlugin): GlyphItAPI {
+  return {
+    getEventEmitter: () => plugin.getEventEmitter(),
+    getIconByName: (iconNameWithPrefix: string) =>
+      icon.getIconByName(plugin, iconNameWithPrefix),
+    getIconByPath: (path: string) => icon.getIconByPath(plugin, path),
+    getIconNameByPath: (path: string) => icon.getByPath(plugin, path),
+    setIconForNode: (iconName: string, node: HTMLElement, color?: string) =>
+      dom.setIconForNode(plugin, iconName, node, { color }),
+    saveIconToIconPack: (iconNameWithPrefix) =>
+      saveIconToIconPack(plugin, iconNameWithPrefix),
+    removeIconFromIconPack: (iconNameWithPrefix) =>
+      removeIconFromIconPack(plugin, iconNameWithPrefix),
+    // Bound rather than passed by reference: as a bare function `this` would
+    // resolve to the API object and the call would silently return undefined.
+    getIconPacks: () => plugin.getIconPackManager().getIconPacks(),
+    doesElementHasIconNode: dom.doesElementHasIconNode,
+    getIconFromElement: dom.getIconFromElement,
+    removeIconInNode: dom.removeIconInNode,
+    removeIconInPath: dom.removeIconInPath,
+    util: {
+      dom,
+      svg,
+    },
+    version: {
+      get current() {
+        return plugin.manifest.version;
+      },
+    },
+  };
+}

@@ -1,0 +1,67 @@
+{
+  "name": "glyphit",
+  "version": "1.0.0",
+  "description": "Add icons to files, folders, and text in Obsidian, with icon packs that stay zipped.",
+  "main": "lib/index.js",
+  "type": "module",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "dev": "rollup --config rollup.config.js -w",
+    "docs:dev": "vitepress dev docs --port 3000",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "build": "rollup --config rollup.config.js --environment BUILD:production",
+    "build:lib": "tsc --project tsconfig.lib.json",
+    "release": "mkdir -p dist && mv main.js dist/ && cp src/styles.css dist/ && cp manifest.json dist/",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
+    "prettify": "prettier --write '*/**/*.{js,ts,tsx}'"
+  },
+  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmarasch/glyphit.git"
+  },
+  "author": "jmarasch",
+  "license": "MIT",
+  "devDependencies": {
+    "@codemirror/language": "https://github.com/lishid/cm-language",
+    "@codemirror/state": "^6.4.1",
+    "@codemirror/view": "^6.26.0",
+    "@eslint/js": "^9.39.2",
+    "@rollup/plugin-alias": "^6.0.0",
+    "@rollup/plugin-babel": "^6.1.0",
+    "@rollup/plugin-commonjs": "^28.0.1",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@twemoji/api": "^17.0.2",
+    "@types/node": "^20.17.9",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "@vitest/coverage-istanbul": "^4.0.18",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "globals": "^17.3.0",
+    "happy-dom": "^20.5.0",
+    "mkdirp": "^3.0.1",
+    "monkey-around": "^3.0.0",
+    "obsidian": "^1.11.4",
+    "prettier": "^3.8.1",
+    "rollup": "^4.57.1",
+    "rollup-plugin-copy": "^3.5.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0",
+    "vitepress": "1.6.4",
+    "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1"
+  },
+  "bugs": {
+    "url": "https://github.com/jmarasch/glyphit/issues"
+  },
+  "homepage": "https://github.com/jmarasch/glyphit#readme"
+}

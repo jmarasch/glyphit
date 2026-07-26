@@ -1,0 +1,36 @@
+.DS_Store
+
+# Intellij
+*.iml
+.idea
+
+# npm
+node_modules
+
+# build
+main.js
+*.js.map
+dist
+
+# icons generation
+build
+remixicons
+fontawesome
+devicon
+
+# obsidian
+data.json
+env.js
+
+# Local test vault
+test-vault
+
+# Vitepress
+docs/.vitepress/dist
+docs/.vitepress/cache
+
+# Vitest
+coverage
+
+# Extracted icon tree (artifact of the zip)
+iconPacks/icons/
