@@ -17,9 +17,10 @@
 
 .glyphit-icon {
   border: 1px solid transparent;
-  margin: 0px 4px 0px 0px;
   display: flex;
   align-self: center;
+  /* The horizontal gap comes from the configurable extra margin, applied
+     inline; this only centres the icon vertically. */
   margin: auto 0;
 }
 
