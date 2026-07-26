@@ -3,7 +3,7 @@
   "name": "GlyphIt",
   "version": "1.0.0",
   "minAppVersion": "1.5.0",
-  "description": "Add icons to anything you desire in Obsidian, including files, folders, and text.",
+  "description": "Add icons to files, folders, tabs, titles and inline text. Icon packs stay compressed, so large packs load fast.",
   "author": "jmarasch",
   "authorUrl": "https://github.com/jmarasch",
   "isDesktopOnly": false

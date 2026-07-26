@@ -1,0 +1,80 @@
+name: Release
+
+# Obsidian requires the git tag to exactly match the `version` in
+# manifest.json, with no `v` prefix. Pushing such a tag builds the plugin and
+# publishes a release with the three files Obsidian installs.
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify the tag matches manifest.json
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          MANIFEST=$(node -p "require('./manifest.json').version")
+          if [ "$TAG" != "$MANIFEST" ]; then
+            echo "::error::Tag '$TAG' does not match manifest.json version '$MANIFEST'."
+            echo "Obsidian will not install a release whose tag and manifest disagree."
+            exit 1
+          fi
+          echo "Releasing $TAG"
+
+      - name: Verify versions.json lists this release
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          node -e "
+            const versions = require('./versions.json');
+            const min = require('./manifest.json').minAppVersion;
+            if (versions['$TAG'] !== min) {
+              console.error('::error::versions.json must map $TAG to minAppVersion ' + min);
+              process.exit(1);
+            }
+          "
+
+      - name: Typecheck
+        run: npx tsc --noEmit --skipLibCheck -p tsconfig.lib.json
+
+      - name: Lint
+        run: npx eslint 'src/**/*.ts'
+
+      - name: Test
+        run: npx vitest run
+
+      - name: Build
+        run: npm run build
+
+      - name: Stage release files
+        run: |
+          mkdir -p dist
+          cp main.js manifest.json dist/
+          cp src/styles.css dist/
+          ls -la dist
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          # Attached individually: Obsidian downloads these by name and cannot
+          # read them out of the source archive.
+          files: |
+            dist/main.js
+            dist/manifest.json
+            dist/styles.css
+          draft: false
+          generate_release_notes: true

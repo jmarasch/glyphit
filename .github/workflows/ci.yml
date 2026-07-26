@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit --skipLibCheck -p tsconfig.lib.json
+
+      - name: Lint
+        run: npx eslint 'src/**/*.ts'
+
+      - name: Test
+        run: npx vitest run
+
+      - name: Build
+        run: npm run build
+
+      - name: Validate the icon pack catalog
+        run: |
+          node -e "
+            const fs = require('fs');
+            const catalog = require('./iconPacks/packs.json');
+            if (catalog.schemaVersion !== 1) throw new Error('unexpected schema');
+            const seen = new Set();
+            for (const pack of catalog.packs) {
+              for (const field of ['id','name','version','file']) {
+                if (!pack[field]) throw new Error(pack.id + ' is missing ' + field);
+              }
+              if (seen.has(pack.id)) throw new Error('duplicate id: ' + pack.id);
+              seen.add(pack.id);
+              if (!fs.existsSync('iconPacks/' + pack.file)) {
+                throw new Error(pack.id + ' names a missing file: ' + pack.file);
+              }
+            }
+            console.log('Catalog OK: ' + catalog.packs.length + ' packs');
+          "

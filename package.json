@@ -1,7 +1,7 @@
 {
   "name": "glyphit",
   "version": "1.0.0",
-  "description": "Add icons to files, folders, and text in Obsidian, with icon packs that stay zipped.",
+  "description": "Add icons to files, folders, tabs, titles and inline text. Icon packs stay compressed, so large packs load fast.",
   "main": "lib/index.js",
   "type": "module",
   "types": "lib/index.d.ts",
