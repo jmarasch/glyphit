@@ -89,7 +89,7 @@ maintained. Icons on files, folders, tabs, titles and inline text, custom rules,
 frontmatter support and the plugin API all originate from that project.
 
 Icon packs are made by other people and remain under their own licences — see
-[Credits](./docs/credits.md) for the full list.
+[CREDITS.md](./CREDITS.md) for the full list.
 
 ## Licence
 

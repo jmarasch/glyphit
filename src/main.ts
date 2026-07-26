@@ -102,7 +102,7 @@ export default class GlyphItPlugin extends Plugin {
   }
 
   async onload() {
-    console.log(`loading ${config.PLUGIN_NAME}`);
+    logger.info(`loading ${config.PLUGIN_NAME}`);
 
     await this.loadPluginData();
     logger.toggleLogging(this.getSettings().debugMode);
@@ -756,7 +756,7 @@ export default class GlyphItPlugin extends Plugin {
   }
 
   onunload() {
-    console.log(`unloading ${config.PLUGIN_NAME}`);
+    logger.info(`unloading ${config.PLUGIN_NAME}`);
   }
 
   renameFolder(newPath: string, oldPath: string): void {

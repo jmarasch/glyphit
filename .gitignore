@@ -34,3 +34,6 @@ coverage
 
 # Extracted icon tree (artifact of the zip)
 iconPacks/icons/
+
+# Documentation site (on hold, kept locally)
+docs

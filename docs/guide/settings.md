@@ -1,3 +1,0 @@
-# Settings
-
-*Documentation Coming Soon*
