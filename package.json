@@ -27,8 +27,8 @@
   "license": "MIT",
   "devDependencies": {
     "@codemirror/language": "git+https://github.com/lishid/cm-language.git#2644bfc27afda707a7e1f3aedaf3ca7120f63cd9",
-    "@codemirror/state": "^6.4.1",
-    "@codemirror/view": "^6.26.0",
+    "@codemirror/state": "6.5.0",
+    "@codemirror/view": "6.38.6",
     "@eslint/js": "^9.39.2",
     "@rollup/plugin-alias": "^6.0.0",
     "@rollup/plugin-babel": "^6.1.0",
