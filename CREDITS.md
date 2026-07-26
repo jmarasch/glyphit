@@ -30,6 +30,7 @@ in anything you publish.
 | Boxicons | [boxicons.com](https://boxicons.com) | MIT |
 | Coolicons | [coolicons.cool](https://coolicons.cool) | CC BY 4.0 |
 | Feather Icons | [feathericons.com](https://feathericons.com) | MIT |
+| Game Icons | [game-icons.net](https://game-icons.net) | CC BY 3.0 / CC0, per author |
 | FontAwesome (Free) | [fontawesome.com](https://fontawesome.com) | CC BY 4.0 / SIL OFL |
 | Icon Brew | [iconbrew.com](https://iconbrew.com) | MIT |
 | Lucide | [lucide.dev](https://lucide.dev) | ISC |

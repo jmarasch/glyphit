@@ -12,8 +12,11 @@ main.js
 *.js.map
 dist
 
-# icons generation
+# Loadable plugin folder, produced by every build (copy build/glyphit into
+# a vault's .obsidian/plugins to test it)
 build
+
+# icons generation
 remixicons
 fontawesome
 devicon

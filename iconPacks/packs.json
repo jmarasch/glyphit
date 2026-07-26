@@ -63,6 +63,16 @@
       "homepage": "https://fontawesome.com"
     },
     {
+      "id": "game-icons",
+      "name": "Game Icons",
+      "version": "1.0.0",
+      "file": "game-icons.net.svg.zip",
+      "path": "",
+      "icons": 4180,
+      "bytes": 4175472,
+      "homepage": "https://game-icons.net"
+    },
+    {
       "id": "icon-brew",
       "name": "Icon Brew",
       "version": "1.0.0",

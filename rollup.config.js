@@ -7,6 +7,14 @@ import copy from 'rollup-plugin-copy';
 const isProd = process.env.BUILD === 'production';
 
 /**
+ * Where each build leaves a folder that can be dropped into a vault.
+ *
+ * The directory name has to match the plugin id in manifest.json, because
+ * Obsidian identifies an installed plugin by its folder name.
+ */
+const LOADABLE_PLUGIN_DIR = './build/glyphit';
+
+/**
  * Path of the vault plugin directory to copy the build into, if one is set up.
  *
  * `env.js` is deliberately untracked, since it points at whatever vault the
@@ -100,19 +108,25 @@ export default async () => {
       }),
       nodeResolve({ browser: true }),
       commonjs(),
-      // Only installs into a vault when env.js says where to put it.
-      ...(obsidianExportPath
-        ? [
-            copy({
-              targets: [
+      copy({
+        targets: [
+          // A loadable plugin folder, ready to copy into any vault's
+          // .obsidian/plugins directory for testing.
+          { src: './main.js', dest: LOADABLE_PLUGIN_DIR },
+          { src: './manifest.json', dest: LOADABLE_PLUGIN_DIR },
+          { src: './src/styles.css', dest: LOADABLE_PLUGIN_DIR },
+
+          // And straight into a vault, when env.js says where.
+          ...(obsidianExportPath
+            ? [
                 { src: './main.js', dest: obsidianExportPath },
                 { src: './manifest.json', dest: obsidianExportPath },
                 { src: './src/styles.css', dest: obsidianExportPath },
-              ],
-              hook: 'writeBundle',
-            }),
-          ]
-        : []),
+              ]
+            : []),
+        ],
+        hook: 'writeBundle',
+      }),
     ],
     onwarn: (warning) => {
       if (warning.code === 'THIS_IS_UNDEFINED') return;

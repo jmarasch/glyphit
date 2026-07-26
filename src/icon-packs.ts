@@ -51,6 +51,14 @@ const predefinedIconPacks = {
     source: 'bundled',
     downloadLink: 'icon-brew.zip',
   },
+  /** @source https://game-icons.net/ */
+  gameIcons: {
+    name: 'game-icons',
+    displayName: 'Game Icons',
+    path: '',
+    source: 'bundled',
+    downloadLink: 'game-icons.net.svg.zip',
+  },
   /** @source https://simpleicons.org/ */
   simpleIcons: {
     name: 'simple-icons',
