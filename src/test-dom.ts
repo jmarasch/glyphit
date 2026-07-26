@@ -108,6 +108,13 @@ export const installObsidianDomExtensions = (): void => {
     }
   });
 
+  define(Element.prototype, 'appendText', function (
+    this: Element,
+    text: string,
+  ) {
+    this.appendChild(this.ownerDocument.createTextNode(text));
+  });
+
   define(Node.prototype, 'empty', function (this: Node) {
     while (this.firstChild) {
       this.removeChild(this.firstChild);

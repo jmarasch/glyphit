@@ -5,6 +5,7 @@ import icon from '@app/lib/icon';
 import { LoggerPrefix, logger } from '@app/lib/logger';
 import GlyphItPlugin from '@app/main';
 import { requireApiVersion, View, WorkspaceLeaf } from 'obsidian';
+import { setIconMarkup } from '@app/lib/util/html';
 
 const TREE_ITEM_CLASS = 'tree-item-self';
 const TREE_ITEM_INNER = 'tree-item-inner';
@@ -88,10 +89,10 @@ export default class OutlineInternalPlugin extends InternalPluginInjector {
             );
             const svgElement = svg.setFontSize(iconObject.svgElement, fontSize);
             iconSpan.addClass('glyphit-icon-in-text');
-            iconSpan.innerHTML = svgElement;
-            treeItemInner.innerHTML = treeItemInner.innerHTML.replace(
-              shortcode,
-              iconSpan.outerHTML,
+            setIconMarkup(iconSpan, svgElement);
+            setIconMarkup(
+              treeItemInner,
+              treeItemInner.innerHTML.replace(shortcode, iconSpan.outerHTML),
             );
 
             text = str;

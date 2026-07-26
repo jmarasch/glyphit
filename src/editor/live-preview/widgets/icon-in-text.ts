@@ -8,6 +8,7 @@ import {
 } from '@app/lib/util/text';
 import GlyphItPlugin from '@app/main';
 import { EditorView, WidgetType } from '@codemirror/view';
+import { setIconMarkup } from '@app/lib/util/html';
 
 export class IconInTextWidget extends WidgetType {
   private start = -1;
@@ -67,12 +68,15 @@ export class IconInTextWidget extends WidgetType {
     if (foundIcon) {
       const svgElement = svg.setFontSize(foundIcon.svgElement, fontSize);
       wrap.addClass('glyphit-icon-in-text');
-      wrap.innerHTML = svgElement;
+      setIconMarkup(wrap, svgElement);
     } else if (emoji.isEmoji(this.id)) {
-      wrap.innerHTML = emoji.parseEmoji(
-        this.plugin.getSettings().emojiStyle,
-        this.id,
-        fontSize,
+      setIconMarkup(
+        wrap,
+        emoji.parseEmoji(
+          this.plugin.getSettings().emojiStyle,
+          this.id,
+          fontSize,
+        ),
       );
     } else {
       wrap.append(

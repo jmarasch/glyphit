@@ -7,6 +7,7 @@ import icon from '@lib/icon';
 import GlyphItPlugin from '@app/main';
 import config from '@app/config';
 import { DEFAULT_FILE_ICON, DEFAULT_FOLDER_ICON } from '@app/util';
+import { setIconMarkup } from '@app/lib/util/html';
 
 interface BookmarksView extends View {
   itemDoms: WeakMap<BookmarkItem, BookmarkItemValue>;
@@ -51,9 +52,9 @@ export default class BookmarkInternalPlugin extends InternalPluginInjector {
         const items = this.bookmark.instance.items;
         const item = items.find((item) => item.path === filePath);
         if (item?.type === 'file') {
-          iconNode.innerHTML = DEFAULT_FILE_ICON;
+          setIconMarkup(iconNode, DEFAULT_FILE_ICON);
         } else if (item?.type === 'folder') {
-          iconNode.innerHTML = DEFAULT_FOLDER_ICON;
+          setIconMarkup(iconNode, DEFAULT_FOLDER_ICON);
         }
       }
       return;

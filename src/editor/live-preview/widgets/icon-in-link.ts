@@ -8,6 +8,7 @@ import {
 import svg from '@app/lib/util/svg';
 import GlyphItPlugin from '@app/main';
 import { WidgetType } from '@codemirror/view';
+import { setIconMarkup } from '@app/lib/util/html';
 
 export class IconInLinkWidget extends WidgetType {
   constructor(
@@ -54,7 +55,7 @@ export class IconInLinkWidget extends WidgetType {
       innerHTML = svg.setFontSize(innerHTML, fontSize);
     }
 
-    iconNode.innerHTML = innerHTML;
+    setIconMarkup(iconNode, innerHTML);
     return iconNode;
   }
 

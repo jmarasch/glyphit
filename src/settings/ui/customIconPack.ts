@@ -28,7 +28,7 @@ export default class CustomIconPackSetting extends GlyphItSetting {
     this.dragOverElement = document.createElement('div');
     this.dragOverElement.addClass('glyphit-dragover-el');
 
-    this.dragOverElement.innerHTML = '<p>Drop to add icon.</p>';
+    this.dragOverElement.createEl('p', { text: 'Drop to add icon.' });
   }
 
   private normalizeIconPackName(value: string): string {

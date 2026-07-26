@@ -8,6 +8,7 @@ import {
 } from 'obsidian';
 import icon from '@app/lib/icon';
 import dom from '@app/lib/util/dom';
+import { appendIconMarkup } from '@app/lib/util/html';
 import emoji from '@app/emoji';
 import { saveIconToIconPack } from '@app/util';
 import GlyphItPlugin from '@app/main';
@@ -92,14 +93,20 @@ export default class SuggestionIcon extends EditorSuggest<string> {
     // Already loaded, so it can be drawn immediately.
     const iconObject = icon.getIconByName(this.plugin, value);
     if (iconObject) {
-      el.innerHTML = `${iconObject.svgElement} <span>${value}</span>`;
+      el.empty();
+      appendIconMarkup(el, iconObject.svgElement);
+      el.appendText(' ');
+      el.createSpan({ text: value });
       return;
     }
 
     const shortcode = emoji.getShortcode(value);
     if (shortcode) {
       // Suggest an emoji - display its shortcode version.
-      el.innerHTML = `<span>${value}</span> <span>${shortcode}</span>`;
+      el.empty();
+      el.createSpan({ text: value });
+      el.appendText(' ');
+      el.createSpan({ text: shortcode });
       return;
     }
 

@@ -3,6 +3,7 @@ import { DEFAULT_FILE_ICON, getAllOpenedFiles } from '@app/util';
 import { TabHeaderLeaf } from '@app/@types/obsidian';
 import customRule from './custom-rule';
 import dom from './util/dom';
+import { setIconMarkup } from './util/html';
 
 /**
  * Gets the tab leaves of a specific file path by looping through all opened files and
@@ -146,7 +147,7 @@ const remove = (iconContainer: HTMLElement, options?: RemoveOptions) => {
     // Removes the display of the icon container to remove the icons from the tabs.
     iconContainer.addClass('glyphit-tab-icon', 'glyphit-is-hidden');
   } else {
-    iconContainer.innerHTML = DEFAULT_FILE_ICON;
+    setIconMarkup(iconContainer, DEFAULT_FILE_ICON);
   }
 };
 

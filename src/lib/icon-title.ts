@@ -3,6 +3,7 @@ import config from '@app/config';
 import emoji from '@app/emoji';
 import svg from './util/svg';
 import { IconInTitlePosition } from '@app/settings/data';
+import { setIconMarkup } from './util/html';
 
 const getTitleIcon = (leaf: HTMLElement): HTMLElement | null => {
   return leaf.querySelector(`.${config.TITLE_ICON_CLASS}`);
@@ -53,7 +54,7 @@ const add = (
       '--glyphit-title-font-size': `${options.fontSize}px`,
     });
   }
-  titleIcon.innerHTML = svgElement;
+  setIconMarkup(titleIcon, svgElement);
 
   let wrapperElement = inlineTitleEl.parentElement;
   // Checks the parent and selects the correct wrapper element.
@@ -109,9 +110,9 @@ const updateStyle = (inlineTitleEl: HTMLElement, options: Options): void => {
 
   if (options.fontSize) {
     if (!emoji.isEmoji(titleIcon.innerHTML)) {
-      titleIcon.innerHTML = svg.setFontSize(
-        titleIcon.innerHTML,
-        options.fontSize,
+      setIconMarkup(
+        titleIcon,
+        svg.setFontSize(titleIcon.innerHTML, options.fontSize),
       );
     } else {
       titleIcon.style.fontSize = `${options.fontSize}px`;

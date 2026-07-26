@@ -4,6 +4,7 @@ import { logger } from '@app/lib/logger';
 import style from './style';
 import svg from './svg';
 import emoji from '@app/emoji';
+import { setIconMarkup } from './html';
 
 /**
  * Removes the `glyphit-icon` icon node from the provided HTMLElement.
@@ -101,18 +102,21 @@ const setIconForNode = (
       node.style.color = options.color;
       iconContent = svg.colorize(iconContent, options.color);
     }
-    node.innerHTML = iconContent;
+    setIconMarkup(node, iconContent);
   } else if (emoji.isEmoji(iconName)) {
     const parsedEmoji =
       emoji.parseEmoji(plugin.getSettings().emojiStyle, iconName) ?? iconName;
-    node.innerHTML = options?.shouldApplyAllStyles
-      ? style.applyAll(plugin, parsedEmoji, node)
-      : parsedEmoji;
+    setIconMarkup(
+      node,
+      options?.shouldApplyAllStyles
+        ? style.applyAll(plugin, parsedEmoji, node)
+        : parsedEmoji,
+    );
   } else {
     // An icon that is not loaded and is not an emoji has nothing to draw.
     // Writing the identifier out as text here would put raw names like
     // `GiSeaDragon` on screen at whatever size the container happens to be.
-    node.innerHTML = '';
+    node.empty();
   }
 
   node.setAttribute('title', iconName);

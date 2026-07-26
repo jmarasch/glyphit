@@ -21,6 +21,7 @@ import {
   iconPickerItem,
   recentPickerItem,
 } from './picker-item';
+import { setIconMarkup } from '@app/lib/util/html';
 
 /** How many rows are rendered for a query. */
 const RESULT_LIMIT = 120;
@@ -397,14 +398,14 @@ export default class IconsPickerModal extends Modal {
         item.id,
       );
       if (parsed) {
-        el.innerHTML = parsed;
+        setIconMarkup(el, parsed);
       }
       return;
     }
 
     const loaded = getSvgFromLoadedIcon(this.plugin, item.prefix, item.name);
     if (loaded) {
-      el.innerHTML = foreground ? svg.colorize(loaded, foreground) : loaded;
+      setIconMarkup(el, foreground ? svg.colorize(loaded, foreground) : loaded);
       return;
     }
 

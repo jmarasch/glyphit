@@ -10,6 +10,7 @@ import {
 } from '@app/lib/util/text';
 import GlyphItPlugin from '@app/main';
 import { MarkdownPostProcessorContext } from 'obsidian';
+import { setIconMarkup } from '@app/lib/util/html';
 
 export const processIconInLinkMarkdown = (
   plugin: GlyphItPlugin,
@@ -76,12 +77,12 @@ export const processIconInLinkMarkdown = (
         emoji.parseEmoji(plugin.getSettings().emojiStyle, iconName, fontSize) ??
         iconName;
       rootSpan.addClass('glyphit-icon-is-emoji');
-      rootSpan.innerHTML = parsedEmoji;
+      setIconMarkup(rootSpan, parsedEmoji);
     } else {
       let svgEl = icon.getIconByName(plugin, iconName).svgElement;
       svgEl = svg.setFontSize(svgEl, fontSize);
       if (svgEl) {
-        rootSpan.innerHTML = svgEl;
+        setIconMarkup(rootSpan, svgEl);
       }
     }
 

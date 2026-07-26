@@ -12,6 +12,7 @@ import {
 } from '@app/lib/util/text';
 import GlyphItPlugin from '@app/main';
 import emoji from '@app/emoji';
+import { setIconMarkup } from '@app/lib/util/html';
 
 export const createIconShortcodeRegex = (plugin: GlyphItPlugin): RegExp => {
   return new RegExp(
@@ -121,12 +122,9 @@ export const processIconInTextMarkdown = (
 
       if (isHeader(tagName)) {
         fontSize = calculateHeaderSize(tagName as HTMLHeader);
-        const svgElement = svg.setFontSize(iconObject.svgElement, fontSize);
-        rootSpan.innerHTML = svgElement;
-      } else {
-        const svgElement = svg.setFontSize(iconObject.svgElement, fontSize);
-        rootSpan.innerHTML = svgElement;
       }
+
+      setIconMarkup(rootSpan, svg.setFontSize(iconObject.svgElement, fontSize));
 
       parentElement?.insertBefore(rootSpan, toReplace);
       toReplace.textContent = toReplace.wholeText.substring(code.text.length);
@@ -140,9 +138,9 @@ export const processIconInTextMarkdown = (
           getComputedStyle(parentElement).fontSize,
         );
         if (!isNaN(parentFontSize)) {
-          rootSpan.innerHTML = svg.setFontSize(
-            rootSpan.innerHTML,
-            parentFontSize,
+          setIconMarkup(
+            rootSpan,
+            svg.setFontSize(rootSpan.innerHTML, parentFontSize),
           );
         }
       });
@@ -185,7 +183,7 @@ export const processIconInTextMarkdown = (
       // containing text node, otherwise it will cause endlessly loop
       // due to TreeWalker considering the first part as its current node,
       // not the second one (except you add another TreeWalker.nextNode() here).
-      emojiNode.innerHTML = emojiValue;
+      setIconMarkup(emojiNode, emojiValue);
       toReplace.parentElement?.insertBefore(emojiNode, toReplace);
       toReplace.textContent = toReplace.wholeText.substring(code.text.length);
     }

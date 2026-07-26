@@ -6,6 +6,7 @@ import emoji from '@app/emoji';
 import GlyphItPlugin from '@app/main';
 import { getFileItemTitleEl } from '@app/util';
 import svg from './svg';
+import { setIconMarkup } from './html';
 
 interface Margin {
   top: number;
@@ -88,18 +89,16 @@ const refreshIconNodes = (
           const hasIndividualColor =
             typeof pathValue === 'object' && pathValue.iconColor;
 
-          iconNode.innerHTML = applyStyles(
-            plugin,
-            iconNode.innerHTML,
+          setIconMarkup(
             iconNode,
+            applyStyles(plugin, iconNode.innerHTML, iconNode),
           );
           if (hasIndividualColor) {
             iconNode.style.color = pathValue.iconColor;
-            const colorizedInnerHtml = svg.colorize(
-              iconNode.innerHTML,
-              pathValue.iconColor,
+            setIconMarkup(
+              iconNode,
+              svg.colorize(iconNode.innerHTML, pathValue.iconColor),
             );
-            iconNode.innerHTML = colorizedInnerHtml;
           }
         }
       }

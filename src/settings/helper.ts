@@ -3,6 +3,7 @@ import style from '@lib/util/style';
 import GlyphItPlugin from '@app/main';
 import { getFileItemTitleEl } from '@app/util';
 import svg from '@app/lib/util/svg';
+import { setIconMarkup } from '@app/lib/util/html';
 
 /**
  * Helper function that refreshes the style of all the icons that are defined
@@ -29,7 +30,7 @@ const refreshStyleOfIcons = async (plugin: GlyphItPlugin): Promise<void> => {
         iconNode.style.color = rule.color;
       }
 
-      iconNode.innerHTML = iconContent;
+      setIconMarkup(iconNode, iconContent);
     }
   }
 };
