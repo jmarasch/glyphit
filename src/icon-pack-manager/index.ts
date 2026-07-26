@@ -264,7 +264,11 @@ export class IconPackManager {
    * by the manual refresh in settings.
    * @returns The number of icons the pack contains.
    */
-  public async loadIndex(pack: IconPack, force = false): Promise<number> {
+  public async loadIndex(
+    pack: IconPack,
+    force = false,
+    packVersion?: string,
+  ): Promise<number> {
     const name = pack.getName();
 
     try {
@@ -281,6 +285,9 @@ export class IconPackManager {
         pack.getPrefix(),
         pack.getSource(),
       );
+      // Preserved across rescans so that re-indexing an installed pack does
+      // not lose track of which published version it came from.
+      rebuilt.packVersion = packVersion ?? stored?.packVersion;
       pack.setIndex(rebuilt);
       await this.indexStore.save(rebuilt);
 
@@ -509,6 +516,7 @@ export class IconPackManager {
   public async registerIconPack(
     name: string,
     arrayBuffer: ArrayBuffer,
+    packVersion?: string,
   ): Promise<IconPack> {
     await this.createDefaultDirectory();
 
@@ -528,10 +536,21 @@ export class IconPackManager {
     );
 
     this.iconPacks.push(pack);
-    await this.loadIndex(pack, true);
+    await this.loadIndex(pack, true, packVersion);
     pack.dispose();
 
     return pack;
+  }
+
+  /**
+   * The published version a pack was installed from, if it came from the
+   * catalog. Used to offer updates.
+   */
+  public async getInstalledPackVersion(
+    packName: string,
+  ): Promise<string | undefined> {
+    const stored = await this.indexStore.load(packName);
+    return stored?.packVersion;
   }
 
   /**

@@ -1,7 +1,7 @@
 # Icons in Notes
 
 Using icons or emojis in your notes is a great way to make them more visually appealing and
-to make them easier to navigate. Obsidian Iconize allows you to do that by just typing
+to make them easier to navigate. GlyphIt allows you to do that by just typing
 and selecting the icon, without interrupting your workflow.
 
 You can do so, by just typing a `:` and then the name of the icon you want to use.

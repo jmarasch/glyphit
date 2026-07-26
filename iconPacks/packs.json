@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-07-26",
+  "packs": [
+    {
+      "id": "boxicons",
+      "name": "Boxicons",
+      "version": "2.1.4",
+      "file": "boxicons.zip",
+      "path": "svg",
+      "icons": 1634,
+      "bytes": 716000,
+      "homepage": "https://boxicons.com"
+    },
+    {
+      "id": "coolicons",
+      "name": "Coolicons",
+      "version": "4.1",
+      "file": "coolicons.zip",
+      "path": "",
+      "icons": 442,
+      "bytes": 222439,
+      "homepage": "https://coolicons.cool"
+    },
+    {
+      "id": "feather-icons",
+      "name": "Feather Icons",
+      "version": "4.29.1",
+      "file": "feather-icons.zip",
+      "path": "",
+      "icons": 287,
+      "bytes": 87958,
+      "homepage": "https://feathericons.com"
+    },
+    {
+      "id": "font-awesome-brands",
+      "name": "FontAwesome Brands",
+      "version": "7.2.0",
+      "file": "font-awesome-brands.zip",
+      "path": "",
+      "icons": 587,
+      "bytes": 447387,
+      "homepage": "https://fontawesome.com"
+    },
+    {
+      "id": "font-awesome-regular",
+      "name": "FontAwesome Regular",
+      "version": "7.2.0",
+      "file": "font-awesome-regular.zip",
+      "path": "",
+      "icons": 273,
+      "bytes": 158413,
+      "homepage": "https://fontawesome.com"
+    },
+    {
+      "id": "font-awesome-solid",
+      "name": "FontAwesome Solid",
+      "version": "7.2.0",
+      "file": "font-awesome-solid.zip",
+      "path": "",
+      "icons": 2000,
+      "bytes": 1113982,
+      "homepage": "https://fontawesome.com"
+    },
+    {
+      "id": "icon-brew",
+      "name": "Icon Brew",
+      "version": "1.0.0",
+      "file": "icon-brew.zip",
+      "path": "",
+      "icons": 284,
+      "bytes": 144505,
+      "homepage": "https://iconbrew.com"
+    },
+    {
+      "id": "lucide-icons",
+      "name": "Lucide",
+      "version": "1.7.0",
+      "file": "lucide-icons.zip",
+      "path": "",
+      "icons": 1694,
+      "bytes": 555377,
+      "homepage": "https://lucide.dev"
+    },
+    {
+      "id": "octicons",
+      "name": "Octicons",
+      "version": "19.8.0",
+      "file": "octicons.zip",
+      "path": "",
+      "icons": 604,
+      "bytes": 240562,
+      "homepage": "https://primer.style/octicons"
+    },
+    {
+      "id": "remix-icons",
+      "name": "Remix Icons",
+      "version": "4.9.1",
+      "file": "remix-icons.zip",
+      "path": "",
+      "icons": 3229,
+      "bytes": 1462082,
+      "homepage": "https://remixicon.com"
+    },
+    {
+      "id": "rpg-awesome",
+      "name": "RPG Awesome",
+      "version": "0.2.0",
+      "file": "rpg-awesome.zip",
+      "path": "",
+      "icons": 495,
+      "bytes": 944477,
+      "homepage": "http://nagoshiashumari.github.io/Rpg-Awesome/"
+    },
+    {
+      "id": "simple-icons",
+      "name": "Simple Icons",
+      "version": "16.15.0",
+      "file": "simple-icons.zip",
+      "path": "",
+      "icons": 3420,
+      "bytes": 2748996,
+      "homepage": "https://simpleicons.org"
+    },
+    {
+      "id": "tabler-icons",
+      "name": "Tabler Icons",
+      "version": "3.1.0",
+      "file": "tabler-icons.zip",
+      "path": "",
+      "icons": 5219,
+      "bytes": 2191392,
+      "homepage": "https://tabler-icons.io"
+    }
+  ]
+}

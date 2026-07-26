@@ -1,39 +1,25 @@
-import GlyphItPlugin from '@app/main';
-import { PredefinedIconPack } from '@app/icon-packs';
 import { downloadZipFile } from '@app/zip-util';
+import { CatalogPack, packDownloadUrl } from './catalog';
 
 /**
- * Obtains the archive for a predefined icon pack.
+ * Downloads a published icon pack's archive.
  *
- * Predefined packs ship inside the plugin folder, repacked to contain only the
- * SVGs the plugin reads. Loading them locally means adding a pack works
- * offline, needs no hosting, and cannot break because an upstream release was
- * retagged or removed.
+ * Packs are hosted alongside the plugin's repository rather than shipped inside
+ * it, because Obsidian only installs `main.js`, `manifest.json` and
+ * `styles.css` from a release — anything else in the plugin folder would be
+ * missing for everyone who installs normally.
  *
- * The `remote` branch is kept for packs added later that are too large to ship
- * or that should track upstream.
- *
- * @param plugin Plugin instance, used to locate its own folder.
- * @param pack The pack definition to load.
- * @returns The archive bytes.
- * @throws If a bundled pack's file is missing from the plugin folder.
+ * @throws If the archive cannot be downloaded.
  */
-export async function loadPackArchive(
-  plugin: GlyphItPlugin,
-  pack: PredefinedIconPack,
-): Promise<ArrayBuffer> {
-  if (pack.source !== 'bundled') {
-    return downloadZipFile(pack.downloadLink);
-  }
+export async function loadPackArchive(pack: CatalogPack): Promise<ArrayBuffer> {
+  const url = packDownloadUrl(pack);
 
-  const path = `${plugin.manifest.dir}/iconPacks/${pack.downloadLink}`;
-
-  if (!(await plugin.app.vault.adapter.exists(path))) {
+  try {
+    return await downloadZipFile(url);
+  } catch (error) {
     throw new Error(
-      `${pack.displayName} ships with the plugin, but '${path}' is missing. ` +
-        `Reinstall the plugin, or rebuild it so the iconPacks folder is copied across.`,
+      `Could not download ${pack.name} from ${url}. ` +
+        `Check your connection and try again. (${error})`,
     );
   }
-
-  return plugin.app.vault.adapter.readBinary(path);
 }

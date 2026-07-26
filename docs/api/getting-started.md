@@ -1,5 +1,5 @@
 ---
-title: API Getting Started | Obsidian Iconize
+title: API Getting Started | GlyphIt
 ---
 
 # Getting Started

@@ -7,16 +7,6 @@ import copy from 'rollup-plugin-copy';
 const isProd = process.env.BUILD === 'production';
 
 /**
- * Icon packs shipped inside the plugin folder.
- *
- * Everything in `iconPacks/bundled/` travels with the build. The archives there
- * are repacked to contain only the SVGs the plugin reads, which is why the
- * whole set is around 11MB rather than the 80MB the upstream releases weigh.
- * Anything in `iconPacks/` but outside `bundled/` is not shipped.
- */
-const BUNDLED_PACKS_GLOB = './iconPacks/bundled/*.zip';
-
-/**
  * Path of the vault plugin directory to copy the build into, if one is set up.
  *
  * `env.js` is deliberately untracked, since it points at whatever vault the
@@ -118,12 +108,6 @@ export default async () => {
                 { src: './main.js', dest: obsidianExportPath },
                 { src: './manifest.json', dest: obsidianExportPath },
                 { src: './src/styles.css', dest: obsidianExportPath },
-                // Packs that are not published anywhere upstream ship with
-                // the plugin rather than being downloaded.
-                {
-                  src: BUNDLED_PACKS_GLOB,
-                  dest: `${obsidianExportPath}/iconPacks`,
-                },
               ],
               hook: 'writeBundle',
             }),

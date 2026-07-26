@@ -85,6 +85,12 @@ export interface IconPackIndex {
   version: number;
   packName: string;
   prefix: string;
+  /**
+   * Version of the published pack this was built from, when it came from the
+   * catalog. Empty for packs the user made themselves. Compared against the
+   * catalog to offer updates.
+   */
+  packVersion?: string;
   sourceType: IconPackSourceType;
   /**
    * Fingerprint of the source at index time, used to detect that the pack

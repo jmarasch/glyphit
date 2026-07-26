@@ -12,7 +12,7 @@
     "docs:preview": "vitepress preview docs",
     "build": "rollup --config rollup.config.js --environment BUILD:production",
     "build:lib": "tsc --project tsconfig.lib.json",
-    "release": "mkdir -p dist/iconPacks && mv main.js dist/ && cp src/styles.css dist/ && cp manifest.json dist/ && cp iconPacks/bundled/*.zip dist/iconPacks/",
+    "release": "mkdir -p dist && mv main.js dist/ && cp src/styles.css dist/ && cp manifest.json dist/",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",

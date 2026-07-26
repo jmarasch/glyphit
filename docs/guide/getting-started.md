@@ -1,5 +1,5 @@
 ---
-title: Getting Started | Obsidian Iconize
+title: Getting Started | GlyphIt
 ---
 
 # Getting Started
@@ -12,13 +12,13 @@ even in a paragraph of your notes.
 
 For installing the plugin, you can either install it from the community plugins or download
 the latest release from the
-[GitHub releases](https://github.com/FlorianWoelki/obsidian-iconize/releases/).
+[GitHub releases](https://github.com/jmarasch/glyphit/releases/).
 
 This was all you need to do to install the plugin. Now you can start using it.
 
 ## Usage
 
-Using the plugin is really straightforward. Obviously, Iconize has a lot of other features,
+Using the plugin is really straightforward. Obviously, GlyphIt has a lot of other features,
 but the most important one is to add icons to your files or folders.
 
 First of all, you need an icon pack. You can either use one of the predefined icon packs or

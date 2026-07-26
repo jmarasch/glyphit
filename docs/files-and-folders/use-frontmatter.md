@@ -3,7 +3,7 @@
 If you want to use a frontmatter property to set the icon, you can follow this
 guide.
 
-First of, you need to enable the properties option, so that Iconize can read
+First of, you need to enable the properties option, so that GlyphIt can read
 your frontmatter values.
 
 ![Enable frontmatter option](../assets/enable-frontmatter-option.png)

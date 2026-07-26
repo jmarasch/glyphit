@@ -3,7 +3,7 @@
 layout: home
 
 hero:
-  name: "Obsidian Iconize"
+  name: "GlyphIt"
   text: "Add icons everywhere"
   tagline: Add icons to anything you desire in Obsidian, including files, folders, and text.
   actions:
@@ -21,10 +21,10 @@ hero:
       link: /notes/icons-in-notes
 
 features:
-  - title: Simplicity
-    details: Install the plugin, download your most favorite icon pack and you are ready to go.
-  - title: Iconize your Vault
+  - title: Built for large packs
+    details: Icon packs stay compressed. Only an index is read at startup, and icons are extracted the first time they are used.
+  - title: Icons everywhere
     details: Set an icon almost everywhere you want. For example on a folder, file or even in a text or in a title.
-  - title: Community Driven
-    details: The plugin is open source and everyone can contribute bug reports, features, or ideas to it.
+  - title: Open source
+    details: A maintained fork of Iconize by Florian Woelki. MIT licensed, and open to bug reports, features and ideas.
 ---

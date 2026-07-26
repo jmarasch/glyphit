@@ -1,7 +1,7 @@
 import { getIcon, getIconIds } from 'obsidian';
 import GlyphItPlugin from '@app/main';
-import predefinedIconPacks from '@app/icon-packs';
 import { loadPackArchive } from './pack-archive';
+import { loadCatalog } from './catalog';
 import { IconPackManager } from '.';
 import { IconPack } from './icon-pack';
 import { MemorySource } from './memory-source';
@@ -75,10 +75,15 @@ export class LucideIconPack {
       await this.iconPackManager.removeIconPack(existing);
     }
 
-    const arrayBuffer = await loadPackArchive(
-      this.plugin,
-      predefinedIconPacks['lucide'],
-    );
+    const catalog = await loadCatalog();
+    const lucide = catalog.find((pack) => pack.id === LUCIDE_ICON_PACK_NAME);
+    if (!lucide) {
+      throw new Error(
+        'The Lucide icon pack is not available in the icon pack catalog.',
+      );
+    }
+
+    const arrayBuffer = await loadPackArchive(lucide);
     await this.iconPackManager.registerIconPack(
       LUCIDE_ICON_PACK_NAME,
       arrayBuffer,

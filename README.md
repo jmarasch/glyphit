@@ -81,6 +81,17 @@ Without `env.js` the build still works, it just does not copy anywhere.
 | `npm run prettify`      | Format with Prettier             |
 | `npm run docs:dev`      | Serve the VitePress docs         |
 
+## Credits
+
+GlyphIt is a fork of [Iconize](https://github.com/FlorianWoelki/obsidian-iconize)
+by **[Florian Woelki](https://github.com/FlorianWoelki)**, which is no longer
+maintained. Icons on files, folders, tabs, titles and inline text, custom rules,
+frontmatter support and the plugin API all originate from that project.
+
+Icon packs are made by other people and remain under their own licences — see
+[Credits](./docs/credits.md) for the full list.
+
 ## Licence
 
-MIT — see [LICENSE](./LICENSE). Retains the original copyright, as required.
+MIT — see [LICENSE](./LICENSE), which retains the original copyright alongside
+this fork's, as the licence requires.

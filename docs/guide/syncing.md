@@ -7,7 +7,7 @@ possibly have thousands of icons, you need to try the following configuration
 [here](https://github.com/obsidianmd/obsidian-api/issues/134)) for a successful
 syncing process:
 
-Try setting the Iconize icon packs folder path to `.obsidian/icons`. Setting the
+Try setting the GlyphIt icon packs folder path to `.obsidian/icons`. Setting the
 icon packs path to this specific path **does not** sync the icon packs and you have
 to sync them manually. This won't clog up the synchronization process of Obsidian Sync.
 

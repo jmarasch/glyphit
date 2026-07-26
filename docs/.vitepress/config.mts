@@ -2,16 +2,17 @@ import { defineConfig } from 'vitepress';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: 'Obsidian Iconize',
+  title: 'GlyphIt',
   description:
-    'Add icons to anything you desire in Obsidian, including files, folders, and text.',
-  base: '/obsidian-iconize/',
+    'Add icons to files, folders, tabs and text in Obsidian, with icon packs that stay compressed.',
+  base: '/glyphit/',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Get Started', link: '/guide/getting-started' },
       { text: 'API', link: '/api/getting-started' },
+      { text: 'Credits', link: '/credits' },
     ],
 
     search: {
@@ -91,15 +92,17 @@ export default defineConfig({
     socialLinks: [
       {
         icon: 'github',
-        link: 'https://github.com/FlorianWoelki/obsidian-iconize',
+        link: 'https://github.com/jmarasch/glyphit',
       },
     ],
 
     footer: {
       message:
-        'Released under the <a href="https://github.com/FlorianWoelki/obsidian-iconize/blob/main/LICENSE">MIT License</a>.',
+        'Released under the <a href="https://github.com/jmarasch/glyphit/blob/main/LICENSE">MIT License</a>.',
       copyright:
-        'Copyright © 2021-present <a href="https://github.com/FlorianWoelki/">Florian Woelki</a>',
+        'Copyright © 2021-present <a href="https://github.com/FlorianWoelki/">Florian Woelki</a> ' +
+        'and <a href="https://github.com/jmarasch/">jmarasch</a>. ' +
+        'GlyphIt is a fork of <a href="https://github.com/FlorianWoelki/obsidian-iconize">Iconize</a>.',
     },
   },
 });
