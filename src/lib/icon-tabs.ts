@@ -54,7 +54,8 @@ const add = async (
   const data = Object.entries(plugin.getData());
 
   // Removes the `display: none` from the obsidian styling.
-  iconContainer.style.display = 'flex';
+  iconContainer.addClass('glyphit-tab-icon');
+  iconContainer.removeClass('glyphit-is-hidden');
 
   // Only add the icon name manually when it is defined in the options.
   if (options?.iconName) {
@@ -62,7 +63,7 @@ const add = async (
       color: iconColor,
     });
     // TODO: Refactor to include option to `insertIconToNode` function.
-    iconContainer.style.margin = null;
+    iconContainer.style.removeProperty('margin');
     return;
   }
 
@@ -74,7 +75,7 @@ const add = async (
         color: rule.color,
       });
       // TODO: Refactor to include option to `insertIconToNode` function.
-      iconContainer.style.margin = null;
+      iconContainer.style.removeProperty('margin');
       break;
     }
   }
@@ -106,7 +107,7 @@ const add = async (
     shouldApplyAllStyles: true,
   });
   // TODO: Refactor to include option to `insertIconToNode` function.
-  iconContainer.style.margin = null;
+  iconContainer.style.removeProperty('margin');
 };
 
 /**
@@ -123,7 +124,7 @@ const update = (
 ) => {
   dom.setIconForNode(plugin, iconName, iconContainer);
   // TODO: Refactor to include option to `insertIconToNode` function.
-  iconContainer.style.margin = null;
+  iconContainer.style.removeProperty('margin');
 };
 
 interface RemoveOptions {
@@ -143,7 +144,7 @@ interface RemoveOptions {
 const remove = (iconContainer: HTMLElement, options?: RemoveOptions) => {
   if (!options?.replaceWithDefaultIcon) {
     // Removes the display of the icon container to remove the icons from the tabs.
-    iconContainer.style.display = 'none';
+    iconContainer.addClass('glyphit-tab-icon', 'glyphit-is-hidden');
   } else {
     iconContainer.innerHTML = DEFAULT_FILE_ICON;
   }

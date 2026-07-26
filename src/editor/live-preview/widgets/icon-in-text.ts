@@ -66,8 +66,7 @@ export class IconInTextWidget extends WidgetType {
 
     if (foundIcon) {
       const svgElement = svg.setFontSize(foundIcon.svgElement, fontSize);
-      wrap.style.display = 'inline-flex';
-      wrap.style.transform = 'translateY(13%)';
+      wrap.addClass('glyphit-icon-in-text');
       wrap.innerHTML = svgElement;
     } else if (emoji.isEmoji(this.id)) {
       wrap.innerHTML = emoji.parseEmoji(

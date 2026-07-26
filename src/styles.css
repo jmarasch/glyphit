@@ -4,15 +4,83 @@
   margin-inline: var(--content-margin);
 }
 
+/* Icon beside the title, on the same line as the text. */
+.glyphit-inline-title-wrapper.glyphit-title-inline {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Icon above the title, on its own line. */
+.glyphit-inline-title-wrapper.glyphit-title-above {
+  display: block;
+}
+
 .glyphit-title-icon {
   max-width: var(--max-width);
   margin-right: var(--size-4-2);
+  /* Nudged down so the glyph sits on the text baseline rather than the
+     line box. Emoji have more built-in leading and need the opposite. */
+  transform: translateY(9%);
+}
+
+.glyphit-title-icon.glyphit-title-inline {
+  display: inline-block;
+  /* Vertical offset is measured from the title's own padding at runtime. */
+  padding-top: var(--glyphit-title-padding-top, 0);
+}
+
+.glyphit-title-icon.glyphit-title-above {
+  display: block;
+  width: var(--line-width);
+  margin-inline: 0;
+}
+
+.glyphit-title-icon.glyphit-title-emoji {
+  font-size: var(--glyphit-title-font-size);
+}
+
+/* Emoji have more built-in leading than an SVG, so beside the title they need
+   lifting rather than dropping. Above it, they line up like anything else. */
+.glyphit-title-icon.glyphit-title-inline.glyphit-title-emoji {
+  transform: translateY(-9%);
+}
+
+.glyphit-title-icon.glyphit-is-hidden {
+  display: none;
+}
+
+/* Tab icons. Obsidian hides the container by default, so showing an icon
+   there means overriding that. */
+.glyphit-tab-icon {
+  display: flex;
+}
+
+.glyphit-tab-icon.glyphit-is-hidden {
+  display: none;
 }
 
 .glyphit-icon-in-link {
   transform: translateY(20%);
   margin-right: var(--size-2-2);
   display: inline-flex;
+}
+
+/* Emoji carry their own baseline, so they need no nudge. */
+.glyphit-icon-in-link.glyphit-icon-is-emoji {
+  transform: translateY(0);
+}
+
+/* An icon written inline in note text, nudged onto the text baseline. */
+.glyphit-icon-in-text {
+  display: inline-flex;
+  transform: translateY(13%);
+}
+
+/* Rows in the editor's `:icon:` autocomplete. */
+.glyphit-suggestion-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .glyphit-icon {
@@ -177,6 +245,11 @@
 /* Icon picker: search, results, and a confirmation preview. */
 .glyphit-picker-modal {
   width: min(46rem, 90vw);
+}
+
+/* Stacked: search, colors, results, then the footer. */
+.glyphit-picker-modal .modal-content {
+  display: block;
 }
 
 .glyphit-picker-search {

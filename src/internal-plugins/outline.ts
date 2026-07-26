@@ -87,8 +87,7 @@ export default class OutlineInternalPlugin extends InternalPluginInjector {
               ) ?? '16',
             );
             const svgElement = svg.setFontSize(iconObject.svgElement, fontSize);
-            iconSpan.style.display = 'inline-flex';
-            iconSpan.style.transform = 'translateY(13%)';
+            iconSpan.addClass('glyphit-icon-in-text');
             iconSpan.innerHTML = svgElement;
             treeItemInner.innerHTML = treeItemInner.innerHTML.replace(
               shortcode,

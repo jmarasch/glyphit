@@ -31,9 +31,8 @@ export class IconInLinkWidget extends WidgetType {
     iconNode.setAttribute('title', iconName);
     iconNode.classList.add('glyphit-icon-in-link');
 
-    if (typeof this.iconData === 'string') {
-      iconNode.style.transform = 'translateY(0)';
-    }
+    // A string payload is an emoji, which needs no baseline nudge.
+    iconNode.toggleClass('glyphit-icon-is-emoji', typeof this.iconData === 'string');
 
     let innerHTML =
       typeof this.iconData === 'string'

@@ -88,7 +88,8 @@ describe('add', () => {
     await iconTabs.add(plugin, '', iconContainer, {
       iconName: 'IbTest',
     });
-    expect(iconContainer.style.display).toBe('flex');
+    expect(iconContainer.classList.contains('glyphit-tab-icon')).toBe(true);
+    expect(iconContainer.classList.contains('glyphit-is-hidden')).toBe(false);
     expect(iconContainer.style.margin).toBe('');
     expect(setIconForNode).toHaveBeenCalledWith(
       plugin,
@@ -209,10 +210,10 @@ describe('update', () => {
 });
 
 describe('remove', () => {
-  it('should set the display style property to `none` when `replaceWithDefaultIcon` is not set', () => {
+  it('should hide the icon container when `replaceWithDefaultIcon` is not set', () => {
     const iconContainer = document.createElement('div');
     iconTabs.remove(iconContainer);
-    expect(iconContainer.style.display).toBe('none');
+    expect(iconContainer.classList.contains('glyphit-is-hidden')).toBe(true);
   });
 
   it('should set the `innerHTML` to the default file icon when `replaceWithDefaultIcon` is set', () => {

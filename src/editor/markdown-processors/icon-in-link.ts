@@ -75,13 +75,12 @@ export const processIconInLinkMarkdown = (
       const parsedEmoji =
         emoji.parseEmoji(plugin.getSettings().emojiStyle, iconName, fontSize) ??
         iconName;
-      rootSpan.style.transform = 'translateY(0)';
+      rootSpan.addClass('glyphit-icon-is-emoji');
       rootSpan.innerHTML = parsedEmoji;
     } else {
       let svgEl = icon.getIconByName(plugin, iconName).svgElement;
       svgEl = svg.setFontSize(svgEl, fontSize);
       if (svgEl) {
-        rootSpan.style.transform = 'translateY(20%)';
         rootSpan.innerHTML = svgEl;
       }
     }

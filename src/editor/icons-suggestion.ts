@@ -87,9 +87,7 @@ export default class SuggestionIcon extends EditorSuggest<string> {
   }
 
   renderSuggestion(value: string, el: HTMLElement): void {
-    el.style.display = 'flex';
-    el.style.alignItems = 'center';
-    el.style.gap = '0.25rem';
+    el.addClass('glyphit-suggestion-row');
 
     // Already loaded, so it can be drawn immediately.
     const iconObject = icon.getIconByName(this.plugin, value);

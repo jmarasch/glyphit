@@ -34,26 +34,24 @@ const add = (
   const isInline =
     plugin.getSettings().iconInTitlePosition === IconInTitlePosition.Inline;
 
-  if (isInline) {
-    titleIcon.style.display = 'inline-block';
-    titleIcon.style.removeProperty('margin-inline');
-    titleIcon.style.removeProperty('width');
-  } else {
-    titleIcon.style.display = 'block';
-    titleIcon.style.width = 'var(--line-width)';
-    titleIcon.style.marginInline = '0';
-  }
+  titleIcon.addClass(config.TITLE_ICON_CLASS);
+  titleIcon.removeClass('glyphit-is-hidden');
+  titleIcon.toggleClass('glyphit-title-inline', isInline);
+  titleIcon.toggleClass('glyphit-title-above', !isInline);
 
-  titleIcon.classList.add(config.TITLE_ICON_CLASS);
   // Checks if the passed element is an emoji.
-  if (emoji.isEmoji(svgElement) && options.fontSize) {
+  const isEmoji = emoji.isEmoji(svgElement);
+  titleIcon.toggleClass('glyphit-title-emoji', isEmoji);
+  if (isEmoji && options.fontSize) {
     svgElement =
       emoji.parseEmoji(
         plugin.getSettings().emojiStyle,
         svgElement,
         options.fontSize,
       ) ?? svgElement;
-    titleIcon.style.fontSize = `${options.fontSize}px`;
+    titleIcon.setCssProps({
+      '--glyphit-title-font-size': `${options.fontSize}px`,
+    });
   }
   titleIcon.innerHTML = svgElement;
 
@@ -80,23 +78,19 @@ const add = (
     inlineTitleEl.parentElement.prepend(wrapperElement);
   }
 
+  wrapperElement.toggleClass('glyphit-title-inline', isInline);
+  wrapperElement.toggleClass('glyphit-title-above', !isInline);
+
   if (isInline) {
-    wrapperElement.style.display = 'flex';
-    wrapperElement.style.alignItems = 'flex-start';
+    // The title's padding depends on the theme and the heading level, so the
+    // only way to line the icon up with the text is to measure it.
     const inlineTitlePaddingTop = getComputedStyle(
       inlineTitleEl,
       null,
     ).getPropertyValue('padding-top');
-    titleIcon.style.paddingTop = inlineTitlePaddingTop;
-
-    if (emoji.isEmoji(svgElement)) {
-      titleIcon.style.transform = 'translateY(-9%)';
-    } else {
-      titleIcon.style.transform = 'translateY(9%)';
-    }
-  } else {
-    wrapperElement.style.display = 'block';
-    titleIcon.style.transform = 'translateY(9%)';
+    titleIcon.setCssProps({
+      '--glyphit-title-padding-top': inlineTitlePaddingTop,
+    });
   }
 
   wrapperElement.append(titleIcon);
@@ -139,7 +133,7 @@ const hide = (inlineTitleEl: HTMLElement): void => {
     return;
   }
 
-  titleIconContainer.style.display = 'none';
+  titleIconContainer.addClass('glyphit-is-hidden');
 };
 
 const remove = (inlineTitleEl: HTMLElement): void => {

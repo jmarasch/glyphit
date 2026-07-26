@@ -30,20 +30,20 @@ describe('add', () => {
     parentEl.appendChild(inlineTitleEl);
 
     titleIcon.add(plugin, inlineTitleEl, '<svg></svg>');
-    expect(parentEl).toMatchInlineSnapshot(`<div>
-  <div
-    class="glyphit-inline-title-wrapper"
-    style="display: block;"
-  >
-    <div
-      class="glyphit-title-icon"
-      style="display: block; width: var(--line-width); transform: translateY(9%);"
-    >
-      <svg />
-    </div>
-    <div />
-  </div>
-</div>`);
+    expect(parentEl).toMatchInlineSnapshot(`
+      <div>
+        <div
+          class="glyphit-inline-title-wrapper glyphit-title-above"
+        >
+          <div
+            class="glyphit-title-icon glyphit-title-above"
+          >
+            <svg />
+          </div>
+          <div />
+        </div>
+      </div>
+    `);
   });
 
   it('should create a title icon with a font size when the passed in element is not an svg element', () => {
@@ -52,20 +52,21 @@ describe('add', () => {
     parentEl.appendChild(inlineTitleEl);
 
     titleIcon.add(plugin, inlineTitleEl, '👍', { fontSize: 10 });
-    expect(parentEl).toMatchInlineSnapshot(`<div>
-  <div
-    class="glyphit-inline-title-wrapper"
-    style="display: block;"
-  >
-    <div
-      class="glyphit-title-icon"
-      style="display: block; width: var(--line-width); font-size: 10px; transform: translateY(9%);"
-    >
-      👍
-    </div>
-    <div />
-  </div>
-</div>`);
+    expect(parentEl).toMatchInlineSnapshot(`
+      <div>
+        <div
+          class="glyphit-inline-title-wrapper glyphit-title-above"
+        >
+          <div
+            class="glyphit-title-icon glyphit-title-above glyphit-title-emoji"
+            style="--glyphit-title-font-size: 10px;"
+          >
+            👍
+          </div>
+          <div />
+        </div>
+      </div>
+    `);
   });
 
   it('should update the title icon when the title icon already exist', () => {
@@ -77,20 +78,20 @@ describe('add', () => {
     parentEl.appendChild(inlineTitleEl);
 
     titleIcon.add(plugin, inlineTitleEl, '<svg></svg>');
-    expect(parentEl).toMatchInlineSnapshot(`<div>
-  <div
-    class="glyphit-inline-title-wrapper"
-    style="display: block;"
-  >
-    <div
-      class="glyphit-title-icon"
-      style="display: block; width: var(--line-width); transform: translateY(9%);"
-    >
-      <svg />
-    </div>
-    <div />
-  </div>
-</div>`);
+    expect(parentEl).toMatchInlineSnapshot(`
+      <div>
+        <div
+          class="glyphit-inline-title-wrapper glyphit-title-above"
+        >
+          <div
+            class="glyphit-title-icon glyphit-title-above"
+          >
+            <svg />
+          </div>
+          <div />
+        </div>
+      </div>
+    `);
   });
 
   it('should call `svg.setFontSize if the `fontSize` option is provided', () => {
@@ -136,7 +137,7 @@ describe('updateStyle', () => {
 });
 
 describe('hide', () => {
-  it('should set the `display` style to `none`, if the title icon element exists', () => {
+  it('should hide the title icon, if the title icon element exists', () => {
     const parentEl = document.createElement('div');
     const titleIconEl = document.createElement('div');
     titleIconEl.classList.add(config.TITLE_ICON_CLASS);
@@ -144,10 +145,12 @@ describe('hide', () => {
     parentEl.appendChild(titleIconEl);
     parentEl.appendChild(inlineTitleEl);
     titleIcon.hide(inlineTitleEl);
-    expect((parentEl.children[0] as HTMLElement).style.display).toEqual('none');
+    expect(parentEl.children[0].classList.contains('glyphit-is-hidden')).toBe(
+      true,
+    );
   });
 
-  it('should not set the `display` style to `none`, if the title icon container does not exist', () => {
+  it('should not hide anything, if the title icon container does not exist', () => {
     const parentEl = document.createElement('div');
     const inlineTitleEl = document.createElement('div');
     parentEl.appendChild(inlineTitleEl);

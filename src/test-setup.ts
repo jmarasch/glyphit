@@ -6,6 +6,11 @@
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { beforeEach, vi } from 'vitest';
+import { installObsidianDomExtensions } from './test-dom';
+
+// Obsidian adds these to the DOM prototypes at runtime; without them, code
+// under test that uses `addClass` or `createDiv` throws.
+installObsidianDomExtensions();
 
 beforeEach(() => {
   vi.clearAllMocks();

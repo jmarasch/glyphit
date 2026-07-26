@@ -113,8 +113,7 @@ export const processIconInTextMarkdown = (
           'aria-hidden': 'true',
         },
       });
-      rootSpan.style.display = 'inline-flex';
-      rootSpan.style.transform = 'translateY(13%)';
+      rootSpan.addClass('glyphit-icon-in-text');
 
       const parentElement = toReplace.parentElement;
       const tagName = parentElement?.tagName?.toLowerCase() ?? '';

@@ -103,7 +103,6 @@ export default class IconsPickerModal extends Modal {
 
   onOpen(): void {
     this.modalEl.addClass('glyphit-picker-modal');
-    this.contentEl.style.display = 'block';
     this.titleEl.setText('Choose an icon');
 
     this.buildItems();

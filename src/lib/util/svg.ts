@@ -18,10 +18,11 @@ const extract = (svgString: string): string => {
     .parseFromString(svgString, 'text/html')
     .querySelector('svg');
 
-  // Removes `width` and `height` from the `style` attribute.
+  // Removes `width` and `height` from the `style` attribute, so that the
+  // attributes set further down are what decides the rendered size.
   if (svg.hasAttribute('style')) {
-    svg.style.width = '';
-    svg.style.height = '';
+    svg.style.removeProperty('width');
+    svg.style.removeProperty('height');
   }
 
   // Add `viewbox`, if it is not already a attribute.
