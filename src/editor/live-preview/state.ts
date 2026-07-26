@@ -3,6 +3,7 @@
 
 import { syntaxTree, tokenClassNodeProp } from '@codemirror/language';
 import icon from '@app/lib/icon';
+import { requestIcon } from '@app/lib/icon-loader';
 import {
   EditorState,
   Range,
@@ -85,6 +86,9 @@ export const buildPositionField = (plugin: GlyphItPlugin) => {
         rawCode.length - identifier.length,
       );
       if (!icon.getIconByName(plugin, iconName)) {
+        // Not in memory. Inline icons are discovered as the note is drawn, so
+        // fetch it in the background and repaint when it lands.
+        requestIcon(plugin, iconName);
         continue;
       }
 

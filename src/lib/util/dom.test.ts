@@ -1,5 +1,4 @@
 import { beforeEach, it, expect, describe, vi, MockInstance } from 'vitest';
-import * as util from '@app/icon-pack-manager/util';
 import dom from './dom';
 import svg from './svg';
 import style from './style';
@@ -85,24 +84,27 @@ describe('getIconFromElement', () => {
 });
 
 describe('setIconForNode', () => {
-  let getSvgFromLoadedIcon: MockInstance;
+  let peekIcon: MockInstance;
   let plugin: any;
   beforeEach(() => {
     vi.restoreAllMocks();
+    // Icons are looked up straight from the pack manager, at the color they
+    // are to be drawn in.
+    peekIcon = vi.fn((id: string) =>
+      id === 'IbTest'
+        ? { svgElement: '<svg test-icon="IbTest"></svg>' }
+        : undefined,
+    );
     plugin = {
       getSettings: () => ({
         emojiStyle: 'native',
         extraMargin: {},
       }),
       getIconPackManager: () => ({
-        peekIcon: (): any => undefined,
+        peekIcon,
         resolveIcon: async (): Promise<any> => null,
       }),
     };
-    getSvgFromLoadedIcon = vi.spyOn(util, 'getSvgFromLoadedIcon');
-    getSvgFromLoadedIcon.mockImplementationOnce(
-      () => '<svg test-icon="IbTest"></svg>',
-    );
   });
 
   it('should set the `innerHTML` with the icon for the provided node', () => {
@@ -125,7 +127,6 @@ describe('setIconForNode', () => {
   });
 
   it('should set the `innerHTML` with the emoji for the provided node', () => {
-    getSvgFromLoadedIcon.mockRestore();
     const applyAll = vi
       .spyOn(style, 'applyAll')
       .mockImplementationOnce(() => '😃');
@@ -140,7 +141,6 @@ describe('setIconForNode', () => {
   });
 
   it('should parse twemoji if the emoji style is `twemoji`', () => {
-    getSvgFromLoadedIcon.mockRestore();
     const applyAll = vi
       .spyOn(style, 'applyAll')
       .mockImplementationOnce(() => '😃');
@@ -170,20 +170,23 @@ describe('setIconForNode', () => {
 });
 
 describe('createIconNode', () => {
-  let getSvgFromLoadedIcon: MockInstance;
   let plugin: any;
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.restoreAllMocks();
     plugin = {
       getSettings: () => ({
+        emojiStyle: 'native',
         extraMargin: {},
       }),
+      getIconPackManager: () => ({
+        peekIcon: (id: string) =>
+          id === 'IbTest'
+            ? { svgElement: '<svg test-icon="IbTest"></svg>' }
+            : undefined,
+        resolveIcon: async (): Promise<any> => null,
+      }),
     };
-    getSvgFromLoadedIcon = vi.spyOn(util, 'getSvgFromLoadedIcon');
-    getSvgFromLoadedIcon.mockImplementationOnce(
-      () => '<svg test-icon="IbTest"></svg>',
-    );
   });
 
   it('should create a new icon node with the provided icon name if an icon node does not already exist', () => {
@@ -272,5 +275,63 @@ describe('createIconNode', () => {
     document.body.appendChild(el);
     dom.createIconNode(plugin, 'test', 'IbTest');
     expect(document.body.innerHTML).toEqual('<div data-path="test"></div>');
+  });
+});
+
+describe('setIconForNode color handling', () => {
+  const iconFor = (svgElement: string) => ({ svgElement }) as any;
+
+  const pluginWith = (loaded: Record<string, string>): any => ({
+    getSettings: () => ({
+      emojiStyle: 'native',
+      fontSize: 16,
+      iconColor: null,
+      extraMargin: { top: 0, right: 4, bottom: 0, left: 0 },
+    }),
+    getIconPackManager: () => ({
+      peekIcon: (id: string, color?: string) => {
+        // Mirrors the real manager: color is part of the cache key.
+        const key = color ? `${id}|${color}` : id;
+        return loaded[key] ? iconFor(loaded[key]) : undefined;
+      },
+    }),
+  });
+
+  it('should find an icon that was resolved at the requested color', () => {
+    const plugin = pluginWith({
+      'GiSeaDragon|#ff00ff': '<svg id="colored"></svg>',
+    });
+    const node = document.createElement('div');
+
+    dom.setIconForNode(plugin, 'GiSeaDragon', node, {
+      color: '#ff00ff',
+      shouldApplyAllStyles: false,
+    });
+
+    expect(node.innerHTML).toContain('svg');
+    // The regression: a color-blind lookup missed, and the identifier was
+    // written out as text instead.
+    expect(node.textContent).not.toContain('GiSeaDragon');
+  });
+
+  it('should render nothing for an unloaded icon rather than its name', () => {
+    const node = document.createElement('div');
+
+    dom.setIconForNode(pluginWith({}), 'GiSeaDragon', node, {
+      shouldApplyAllStyles: false,
+    });
+
+    expect(node.innerHTML).toBe('');
+    expect(node.textContent).toBe('');
+  });
+
+  it('should still render emoji through the emoji path', () => {
+    const node = document.createElement('div');
+
+    dom.setIconForNode(pluginWith({}), '😁', node, {
+      shouldApplyAllStyles: false,
+    });
+
+    expect(node.innerHTML).toBe('😁');
   });
 });

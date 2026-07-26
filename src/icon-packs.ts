@@ -2,114 +2,116 @@ export interface PredefinedIconPack {
   name: string;
   displayName: string;
   path: string;
+  /**
+   * Where the archive comes from.
+   *
+   * `remote` packs are downloaded from their upstream project on demand.
+   * `bundled` packs ship inside the plugin folder, because they are not
+   * published as a release anywhere and hosting them ourselves would break for
+   * anyone whose copy of this repository is private or unpushed.
+   */
+  source: 'remote' | 'bundled';
+  /** Download URL for `remote` packs, filename inside `iconPacks/` for `bundled`. */
   downloadLink: string;
 }
-
-/**
- * Where the icon packs bundled with this repository are downloaded from.
- *
- * Three packs are not published as releases anywhere upstream, so their `.zip`
- * files live in this repository's `iconPacks/` directory and are fetched from
- * the raw content host. Change this one constant if the repository is renamed
- * or moved; the pack definitions below build their links from it.
- */
-const BUNDLED_PACK_BASE_URL =
-  'https://github.com/jmarasch/glyphit/raw/main/iconPacks';
 
 const predefinedIconPacks = {
   faBrands: {
     name: 'font-awesome-brands',
     displayName: 'FontAwesome Brands',
-    path: 'fontawesome-free-7.2.0-web/svgs/brands/',
-    downloadLink:
-      'https://github.com/FortAwesome/Font-Awesome/releases/download/7.2.0/fontawesome-free-7.2.0-web.zip',
+    path: '',
+    source: 'bundled',
+    downloadLink: 'font-awesome-brands.zip',
   },
   faRegular: {
     name: 'font-awesome-regular',
     displayName: 'FontAwesome Regular',
-    path: 'fontawesome-free-7.2.0-web/svgs/regular/',
-    downloadLink:
-      'https://github.com/FortAwesome/Font-Awesome/releases/download/7.2.0/fontawesome-free-7.2.0-web.zip',
+    path: '',
+    source: 'bundled',
+    downloadLink: 'font-awesome-regular.zip',
   },
   faSolid: {
     name: 'font-awesome-solid',
     displayName: 'FontAwesome Solid',
-    path: 'fontawesome-free-7.2.0-web/svgs/solid/',
-    downloadLink:
-      'https://github.com/FortAwesome/Font-Awesome/releases/download/7.2.0/fontawesome-free-7.2.0-web.zip',
+    path: '',
+    source: 'bundled',
+    downloadLink: 'font-awesome-solid.zip',
   },
   remixIcons: {
     name: 'remix-icons',
     displayName: 'Remix Icons',
     path: '',
-    downloadLink:
-      'https://github.com/Remix-Design/RemixIcon/releases/download/v4.9.1/RemixIcon_Svg_v4.9.1.zip',
+    source: 'bundled',
+    downloadLink: 'remix-icons.zip',
   },
   iconBrew: {
     name: 'icon-brew',
     displayName: 'Icon Brew',
     path: '',
-    downloadLink: `${BUNDLED_PACK_BASE_URL}/icon-brew.zip`,
+    source: 'bundled',
+    downloadLink: 'icon-brew.zip',
   },
   /** @source https://simpleicons.org/ */
   simpleIcons: {
     name: 'simple-icons',
     displayName: 'Simple Icons',
-    path: 'simple-icons-16.15.0/icons/',
-    downloadLink:
-      'https://github.com/simple-icons/simple-icons/archive/refs/tags/16.15.0.zip',
+    path: '',
+    source: 'bundled',
+    downloadLink: 'simple-icons.zip',
   },
   lucide: {
     name: 'lucide-icons',
     displayName: 'Lucide',
     path: '',
-    downloadLink:
-      'https://github.com/lucide-icons/lucide/releases/download/1.7.0/lucide-icons-1.7.0.zip',
+    source: 'bundled',
+    downloadLink: 'lucide-icons.zip',
   },
   tablerIcons: {
     name: 'tabler-icons',
     displayName: 'Tabler Icons',
-    path: 'svg',
-    downloadLink:
-      'https://github.com/tabler/tabler-icons/releases/download/v3.1.0/tabler-icons-3.1.0.zip',
+    path: '',
+    source: 'bundled',
+    downloadLink: 'tabler-icons.zip',
   },
   /** @source https://boxicons.com/ */
   boxicons: {
     name: 'boxicons',
     displayName: 'Boxicons',
     path: 'svg',
-    downloadLink: `${BUNDLED_PACK_BASE_URL}/boxicons.zip`,
+    source: 'bundled',
+    downloadLink: 'boxicons.zip',
   },
   /** @source http://nagoshiashumari.github.io/Rpg-Awesome/ */
   rpgAwesome: {
     name: 'rpg-awesome',
     displayName: 'RPG Awesome',
     path: '',
-    downloadLink: `${BUNDLED_PACK_BASE_URL}/rpg-awesome.zip`,
+    source: 'bundled',
+    downloadLink: 'rpg-awesome.zip',
   },
   /** @source https://coolicons.cool/ */
   coolicons: {
     name: 'coolicons',
     displayName: 'Coolicons',
-    path: 'cooliocns SVG',
-    downloadLink:
-      'https://github.com/krystonschwarze/coolicons/releases/download/v4.1/coolicons.v4.1.zip',
+    path: '',
+    source: 'bundled',
+    downloadLink: 'coolicons.zip',
   },
   /** @source https://feathericons.com/ */
   feathericons: {
     name: 'feather-icons',
     displayName: 'Feather Icons',
-    path: 'feather-4.29.1/icons/',
-    downloadLink:
-      'https://github.com/feathericons/feather/archive/refs/tags/v4.29.1.zip',
+    path: '',
+    source: 'bundled',
+    downloadLink: 'feather-icons.zip',
   },
   /** @source https://github.com/primer/octicons */
   octicons: {
     name: 'octicons',
     displayName: 'Octicons',
-    path: 'octicons-19.8.0/icons/',
-    downloadLink:
-      'https://github.com/primer/octicons/archive/refs/tags/v19.8.0.zip',
+    path: '',
+    source: 'bundled',
+    downloadLink: 'octicons.zip',
   },
 } as { [key: string]: PredefinedIconPack };
 

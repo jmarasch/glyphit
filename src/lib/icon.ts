@@ -39,13 +39,13 @@ const getReferencedIcons = (
 };
 
 /**
- * Makes sure every icon the vault refers to is extracted and rendered, and
- * clears cache entries nothing refers to any more.
+ * Makes sure every icon the vault refers to is extracted and rendered.
  *
- * Only the plugin's own cache is ever deleted from. Installed packs, including
- * custom folders the user fills themselves, are read-only here: a previous
- * version pruned unreferenced `.svg` files straight out of the pack directories,
- * which silently destroyed hand-made icon packs.
+ * This deliberately only restores; it never deletes. It can see icons assigned
+ * to paths and matched by rules, but not ones written inline in a note as
+ * `:IconName:`, so anything it deleted on that basis could well be on screen.
+ * Removing unused cache entries is a separate, explicit action that scans the
+ * vault first — see `collectAllUsedIcons`.
  */
 const checkMissingIcons = async (
   plugin: GlyphItPlugin,
@@ -88,33 +88,6 @@ const checkMissingIcons = async (
         dom.setIconForNode(plugin, iconNameWithPrefix, node);
       });
     }
-  }
-
-  await pruneCache(plugin, referenced);
-};
-
-/**
- * Deletes cached icons that nothing refers to any more.
- */
-const pruneCache = async (
-  plugin: GlyphItPlugin,
-  referenced: Set<string>,
-): Promise<void> => {
-  const iconPackManager = plugin.getIconPackManager();
-  const cacheStore = iconPackManager.getCacheStore();
-
-  // The set of cache filenames that are still legitimate, in every colour.
-  const keep = new Set<string>();
-  for (const iconNameWithPrefix of referenced) {
-    const located = iconPackManager.findEntry(iconNameWithPrefix);
-    if (located) {
-      keep.add(cacheStore.identityOf(located.pack.getName(), located.entry));
-    }
-  }
-
-  const removed = await cacheStore.pruneExcept(keep);
-  if (removed > 0) {
-    logger.info(`Removed ${removed} unused cached icon(s)`);
   }
 };
 
@@ -170,6 +143,8 @@ const addAll = (
             const iconName = typeof value === 'string' ? value : value.iconName;
             const iconColor =
               typeof value === 'string' ? undefined : value.iconColor;
+            const iconBackgroundColor =
+              typeof value === 'string' ? undefined : value.iconBackgroundColor;
             if (iconName) {
               // Removes a possible existing icon.
               const existingIcon = titleEl.querySelector('.glyphit-icon');
@@ -187,6 +162,7 @@ const addAll = (
               });
               dom.setIconForNode(plugin, iconName, iconNode, {
                 color: iconColor,
+                backgroundColor: iconBackgroundColor,
               });
 
               titleEl.insertBefore(iconNode, titleInnerEl);

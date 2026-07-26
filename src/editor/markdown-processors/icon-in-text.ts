@@ -3,6 +3,7 @@
 
 import svg from '@app/lib/util/svg';
 import icon from '@app/lib/icon';
+import { requestIcon } from '@app/lib/icon-loader';
 import {
   HTMLHeader,
   calculateFontTextSize,
@@ -99,6 +100,9 @@ export const processIconInTextMarkdown = (
     );
 
     const iconObject = icon.getIconByName(plugin, iconName);
+    if (!iconObject) {
+      requestIcon(plugin, iconName);
+    }
     if (iconObject) {
       const toReplace = text.splitText(code.index);
       const rootSpan = createSpan({

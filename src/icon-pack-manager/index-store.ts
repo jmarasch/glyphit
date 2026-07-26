@@ -109,6 +109,26 @@ export class IndexStore {
   }
 
   /**
+   * Names every pack that has a persisted index.
+   *
+   * Includes packs that are no longer installed, whose index is deliberately
+   * kept so icons already in use can still be resolved from the cache.
+   */
+  public async listIndexedPacks(): Promise<string[]> {
+    const dir = indexDir(this.iconPacksPath);
+
+    if (!(await this.fs.exists(dir))) {
+      return [];
+    }
+
+    const listing = await this.fs.list(dir);
+    return listing.files
+      .map((file) => file.substring(file.lastIndexOf('/') + 1))
+      .filter((name) => name.endsWith('.json'))
+      .map((name) => name.slice(0, -'.json'.length));
+  }
+
+  /**
    * Removes a pack's index, if it exists.
    */
   public async delete(packName: string): Promise<void> {

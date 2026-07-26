@@ -6,7 +6,7 @@ import { Icon } from './types';
  * Turns raw SVG markup into the {@link Icon} shape the rest of the plugin
  * renders.
  *
- * This is the only place that parses icon markup, so the normalisation applied
+ * This is the only place that parses icon markup, so the normalization applied
  * to a downloaded pack, a user's custom folder and a cached file is identical.
  */
 

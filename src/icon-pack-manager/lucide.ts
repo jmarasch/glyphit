@@ -1,7 +1,7 @@
 import { getIcon, getIconIds } from 'obsidian';
 import GlyphItPlugin from '@app/main';
 import predefinedIconPacks from '@app/icon-packs';
-import { downloadZipFile } from '@app/zip-util';
+import { loadPackArchive } from './pack-archive';
 import { IconPackManager } from '.';
 import { IconPack } from './icon-pack';
 import { MemorySource } from './memory-source';
@@ -75,8 +75,9 @@ export class LucideIconPack {
       await this.iconPackManager.removeIconPack(existing);
     }
 
-    const arrayBuffer = await downloadZipFile(
-      predefinedIconPacks['lucide'].downloadLink,
+    const arrayBuffer = await loadPackArchive(
+      this.plugin,
+      predefinedIconPacks['lucide'],
     );
     await this.iconPackManager.registerIconPack(
       LUCIDE_ICON_PACK_NAME,

@@ -4,10 +4,6 @@ import { logger } from '@app/lib/logger';
 import style from './style';
 import svg from './svg';
 import emoji from '@app/emoji';
-import {
-  getSvgFromLoadedIcon,
-  nextIdentifier,
-} from '@app/icon-pack-manager/util';
 
 /**
  * Removes the `glyphit-icon` icon node from the provided HTMLElement.
@@ -48,7 +44,18 @@ const removeIconInPath = (path: string, options?: RemoveOptions): void => {
 
 interface SetIconForNodeOptions {
   color?: string;
+  /**
+   * Color drawn behind the icon. Applied to the container rather than the
+   * SVG, so it works for emoji as well as icons.
+   */
+  backgroundColor?: string;
   shouldApplyAllStyles?: boolean;
+  /**
+   * Whether resolving the icon may write it to the on-disk cache. Browsing UIs
+   * pass `false` so that scrolling a pack does not fill the cache with icons
+   * that were only ever looked at.
+   */
+  persist?: boolean;
 }
 
 /**
@@ -68,13 +75,22 @@ const setIconForNode = (
   options ??= {};
   options.shouldApplyAllStyles ??= true;
 
-  // Gets the possible icon based on the icon name.
-  const iconNextIdentifier = nextIdentifier(iconName);
-  const possibleIcon = getSvgFromLoadedIcon(
-    plugin,
-    iconName.substring(0, iconNextIdentifier),
-    iconName.substring(iconNextIdentifier),
-  );
+  // Looked up at the color it will be drawn in. Color is part of the cache
+  // key, so peeking without it misses an icon that was resolved with one, and
+  // the miss used to fall through to the emoji branch below.
+  const possibleIcon =
+    plugin.getIconPackManager().peekIcon(iconName, options?.color)
+      ?.svgElement ?? '';
+
+  // The background sits on the container, so it is set the same way whether
+  // the node ends up holding an icon or an emoji.
+  if (options?.backgroundColor) {
+    node.style.backgroundColor = options.backgroundColor;
+    node.classList.add('glyphit-icon-has-background');
+  } else {
+    node.style.removeProperty('background-color');
+    node.classList.remove('glyphit-icon-has-background');
+  }
 
   if (possibleIcon) {
     // The icon is possibly not an emoji.
@@ -86,12 +102,17 @@ const setIconForNode = (
       iconContent = svg.colorize(iconContent, options.color);
     }
     node.innerHTML = iconContent;
-  } else {
+  } else if (emoji.isEmoji(iconName)) {
     const parsedEmoji =
       emoji.parseEmoji(plugin.getSettings().emojiStyle, iconName) ?? iconName;
     node.innerHTML = options?.shouldApplyAllStyles
       ? style.applyAll(plugin, parsedEmoji, node)
       : parsedEmoji;
+  } else {
+    // An icon that is not loaded and is not an emoji has nothing to draw.
+    // Writing the identifier out as text here would put raw names like
+    // `GiSeaDragon` on screen at whatever size the container happens to be.
+    node.innerHTML = '';
   }
 
   node.setAttribute('title', iconName);
@@ -116,7 +137,9 @@ const setIconForNodeAsync = async (
   options?: SetIconForNodeOptions,
 ): Promise<void> => {
   if (!emoji.isEmoji(iconName)) {
-    await plugin.getIconPackManager().resolveIcon(iconName, options?.color);
+    await plugin.getIconPackManager().resolveIcon(iconName, options?.color, {
+      persist: options?.persist ?? false,
+    });
   }
 
   // The node can be recycled or removed while the icon is being read.
@@ -135,6 +158,10 @@ interface CreateOptions {
    * The color that will be applied to the icon.
    */
   color?: string;
+  /**
+   * The color drawn behind the icon.
+   */
+  backgroundColor?: string;
 }
 
 /**
@@ -173,14 +200,20 @@ const createIconNode = (
   let iconNode: HTMLDivElement = node.querySelector('.glyphit-icon');
   // If the icon is already set in the path, we do not need to create a new div element.
   if (iconNode) {
-    setIconForNode(plugin, iconName, iconNode, { color: options?.color });
+    setIconForNode(plugin, iconName, iconNode, {
+      color: options?.color,
+      backgroundColor: options?.backgroundColor,
+    });
   } else {
     // Creates a new icon node and inserts it to the DOM.
     iconNode = document.createElement('div');
     iconNode.setAttribute(config.ICON_ATTRIBUTE_NAME, iconName);
     iconNode.classList.add('glyphit-icon');
 
-    setIconForNode(plugin, iconName, iconNode, { color: options?.color });
+    setIconForNode(plugin, iconName, iconNode, {
+      color: options?.color,
+      backgroundColor: options?.backgroundColor,
+    });
 
     node.insertBefore(iconNode, titleNode);
   }

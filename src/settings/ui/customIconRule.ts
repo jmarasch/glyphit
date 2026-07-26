@@ -122,10 +122,11 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
           }
 
           const modal = new IconsPickerModal(this.app, this.plugin, '');
+          // The chosen icon belongs to the rule, not to a file.
+          modal.commitToPath = false;
           modal.onChooseItem = async (item) => {
-            const icon = getNormalizedName(
-              typeof item === 'object' ? item.displayName : item,
-            );
+            // Picker rows already carry the identifier the rule should store.
+            const icon = typeof item === 'object' ? item.id : item;
 
             const rule: CustomRule = {
               rule: this.textComponent.getValue(),
@@ -350,8 +351,10 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
               this.plugin,
               rule.icon,
             );
+            modal.commitToPath = false;
+            modal.initialIcon = rule.icon;
             modal.onChooseItem = async (item) => {
-              const icon = typeof item === 'object' ? item.displayName : item;
+              const icon = typeof item === 'object' ? item.id : item;
               rule.icon = icon;
               dom.setIconForNode(this.plugin, rule.icon, iconPreviewEl);
               iconPreviewEl.innerHTML = svg.setFontSize(
@@ -421,7 +424,10 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
       // Add the delete custom rule button.
       settingRuleEl.addButton((btn) => {
         btn.setIcon('trash');
-        btn.setTooltip('Remove the custom rule');
+        btn.setWarning();
+        btn.setTooltip(
+          'Remove the custom rule. Icons it applied will disappear from matching files.',
+        );
         btn.onClick(async () => {
           const newRules = this.plugin
             .getSettings()

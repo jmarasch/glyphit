@@ -17,9 +17,9 @@ export interface ResolveRequest {
   prefix: string;
   /** Where the icon's bytes can be read from on a cache miss. */
   source: IconSource;
-  /** Colour to draw the icon in, or nullish to inherit from the theme. */
+  /** Color to draw the icon in, or nullish to inherit from the theme. */
   foreground?: string | null;
-  /** Background colour, or nullish for none. */
+  /** Background color, or nullish for none. */
   background?: string | null;
 }
 
@@ -38,9 +38,40 @@ export interface ResolveRequest {
  * The practical effect is that a vault only ever pays for the icons it actually
  * uses, no matter how large the installed packs are.
  */
+/**
+ * How a resolved icon should be retained.
+ */
+export interface ResolveOptions {
+  /**
+   * Whether the result is written to the on-disk cache.
+   *
+   * `true` for icons the vault actually uses. `false` for previews: browsing
+   * the picker touches thousands of icons that will never be chosen, and
+   * writing each one out would fill the cache with junk on the first search.
+   */
+  persist?: boolean;
+}
+
+/**
+ * How many preview icons are held in memory before the oldest are dropped.
+ *
+ * Scrolling a large pack can touch thousands of icons; without a bound they
+ * would all be retained for the rest of the session.
+ */
+const PREVIEW_MEMORY_LIMIT = 400;
+
 export class IconResolver {
-  /** Resolved icons, keyed by {@link cacheKey}. */
+  /**
+   * Icons the vault uses. Unbounded: these are needed for rendering and there
+   * are only ever as many as the vault refers to.
+   */
   private readonly memory = new Map<string, Icon>();
+
+  /**
+   * Icons resolved only to draw a preview. Bounded and never written to disk;
+   * insertion-ordered so the oldest can be evicted.
+   */
+  private readonly previews = new Map<string, Icon>();
 
   constructor(private readonly cache: IconCacheStore) {}
 
@@ -76,7 +107,29 @@ export class IconResolver {
    * @returns The icon, or `undefined` if it is not in memory.
    */
   public peek(request: ResolveRequest): Icon | undefined {
-    return this.memory.get(cacheKey(this.keyPartsFor(request)));
+    const key = cacheKey(this.keyPartsFor(request));
+    return this.memory.get(key) ?? this.previews.get(key);
+  }
+
+  /**
+   * Records a resolved icon in the appropriate tier.
+   */
+  private remember(key: string, icon: Icon, persist: boolean): void {
+    if (persist) {
+      this.previews.delete(key);
+      this.memory.set(key, icon);
+      return;
+    }
+
+    this.previews.set(key, icon);
+
+    while (this.previews.size > PREVIEW_MEMORY_LIMIT) {
+      const oldest = this.previews.keys().next().value as string | undefined;
+      if (oldest === undefined) {
+        break;
+      }
+      this.previews.delete(oldest);
+    }
   }
 
   /**
@@ -84,12 +137,21 @@ export class IconResolver {
    *
    * @returns The rendered icon, or `null` if its bytes could not be found.
    */
-  public async resolve(request: ResolveRequest): Promise<Icon | null> {
+  public async resolve(
+    request: ResolveRequest,
+    options: ResolveOptions = {},
+  ): Promise<Icon | null> {
+    const persist = options.persist ?? true;
     const parts = this.keyPartsFor(request);
     const key = cacheKey(parts);
 
-    const memoized = this.memory.get(key);
+    const memoized = this.memory.get(key) ?? this.previews.get(key);
     if (memoized) {
+      // A preview that is now genuinely in use gets promoted and written out.
+      if (persist && !this.memory.has(key)) {
+        this.remember(key, memoized, true);
+        await this.cache.write(parts, memoized.svgElement);
+      }
       return memoized;
     }
 
@@ -97,7 +159,7 @@ export class IconResolver {
     if (cached !== null) {
       const icon = this.build(request, cached);
       if (icon) {
-        this.memory.set(key, icon);
+        this.remember(key, icon, persist);
         return icon;
       }
 
@@ -118,16 +180,19 @@ export class IconResolver {
       return null;
     }
 
-    // Colour is applied after normalisation, not before: normalising is what
+    // Color is applied after normalization, not before: normalizing is what
     // gives the markup a paint attribute to override in the first place.
     if (request.foreground) {
       icon.svgElement = svg.colorize(icon.svgElement, request.foreground);
     }
 
-    this.memory.set(key, icon);
-    // The cache stores the icon exactly as it renders, so a cache hit needs no
-    // further work.
-    await this.cache.write(parts, icon.svgElement);
+    this.remember(key, icon, persist);
+
+    if (persist) {
+      // The cache stores the icon exactly as it renders, so a cache hit needs
+      // no further work.
+      await this.cache.write(parts, icon.svgElement);
+    }
 
     return icon;
   }
@@ -168,9 +233,11 @@ export class IconResolver {
    * outlive the source it came from.
    */
   public forgetLibrary(library: string): void {
-    for (const [key, icon] of this.memory) {
-      if (icon.iconPackName === library) {
-        this.memory.delete(key);
+    for (const tier of [this.memory, this.previews]) {
+      for (const [key, icon] of tier) {
+        if (icon.iconPackName === library) {
+          tier.delete(key);
+        }
       }
     }
   }
@@ -180,6 +247,14 @@ export class IconResolver {
    */
   public clear(): void {
     this.memory.clear();
+    this.previews.clear();
+  }
+
+  /**
+   * Drops preview icons, which are never needed to render the vault.
+   */
+  public clearPreviews(): void {
+    this.previews.clear();
   }
 
   /**
@@ -187,5 +262,12 @@ export class IconResolver {
    */
   public get size(): number {
     return this.memory.size;
+  }
+
+  /**
+   * Number of preview icons held in memory, for diagnostics.
+   */
+  public get previewSize(): number {
+    return this.previews.size;
   }
 }

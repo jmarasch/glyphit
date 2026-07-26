@@ -1,8 +1,9 @@
 import { App, FuzzyMatch, FuzzySuggestModal, Notice } from 'obsidian';
 import predefinedIconPacks, { PredefinedIconPack } from '@app/icon-packs';
 import GlyphItPlugin from '@app/main';
-import { downloadZipFile } from '@app/zip-util';
+import { loadPackArchive } from '@app/icon-pack-manager/pack-archive';
 import { generatePrefix } from '@app/icon-pack-manager/naming';
+import { logger } from '@app/lib/logger';
 
 export default class IconPackBrowserModal extends FuzzySuggestModal<PredefinedIconPack> {
   private plugin: GlyphItPlugin;
@@ -44,16 +45,38 @@ export default class IconPackBrowserModal extends FuzzySuggestModal<PredefinedIc
     item: PredefinedIconPack,
     _event: MouseEvent | KeyboardEvent,
   ): Promise<void> {
-    new Notice(`Adding ${item.displayName}...`);
+    const notice = new Notice(`Adding ${item.displayName}...`, 0);
 
-    const arrayBuffer = await downloadZipFile(item.downloadLink);
-    // The archive is stored as-is and indexed in place; it is never unpacked.
-    const pack = await this.plugin
-      .getIconPackManager()
-      .registerIconPack(item.name, arrayBuffer);
+    try {
+      const arrayBuffer = await loadPackArchive(this.plugin, item);
 
-    new Notice(`...${item.displayName} added (${pack.size} icons)`);
-    this.onAddedIconPack();
+      // The archive is stored as-is and indexed in place; never unpacked.
+      const pack = await this.plugin
+        .getIconPackManager()
+        .registerIconPack(item.name, arrayBuffer);
+
+      notice.hide();
+
+      if (pack.size === 0) {
+        new Notice(
+          `${item.displayName} was added but contains no usable icons. Its archive layout may have changed upstream.`,
+          10000,
+        );
+      } else {
+        new Notice(`${item.displayName} added (${pack.size} icons).`, 5000);
+      }
+
+      this.onAddedIconPack();
+    } catch (error) {
+      // Without this the promise rejects into nowhere and the user is left
+      // looking at a notice that never resolves.
+      notice.hide();
+      logger.error(`Could not add icon pack '${item.name}' (${error})`);
+      new Notice(
+        `Could not add ${item.displayName}: ${error?.message ?? error}`,
+        10000,
+      );
+    }
   }
 
   renderSuggestion(

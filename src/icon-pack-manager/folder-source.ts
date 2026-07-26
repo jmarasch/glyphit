@@ -6,7 +6,7 @@ import { IconSource, RawEntry, SourceFingerprint } from './types';
  *
  * This backs "custom" icon packs, the ones users build by dropping SVGs into a
  * folder. Unlike the previous implementation the walk is recursive, so a custom
- * pack can be organised into subfolders and still have every icon found; the
+ * pack can be organized into subfolders and still have every icon found; the
  * naming rules then disambiguate any filenames that repeat across them.
  */
 export class FolderSource implements IconSource {

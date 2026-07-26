@@ -157,12 +157,12 @@ interface Candidate {
  * Packs often nest icons under directories that carry no distinguishing
  * information for a given collision. game-icons.net ships every icon twice,
  * under `000000/transparent/1x1/<author>` and `ffffff/transparent/1x1/<author>`;
- * for two icons that differ only in colour, `transparent`, `1x1` and the author
- * are identical and only the colour segment is worth keeping.
+ * for two icons that differ only in color, `transparent`, `1x1` and the author
+ * are identical and only the color segment is worth keeping.
  *
  * So rather than folding in the whole folder path, only the segments that vary
  * within the colliding group are used. That yields `Ffffff`/`000000` for a
- * colour-only clash, and colour plus author when the same filename is also used
+ * color-only clash, and color plus author when the same filename is also used
  * by two different authors.
  *
  * @param folders Folder paths of every icon in the colliding group.

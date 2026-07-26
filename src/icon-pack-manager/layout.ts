@@ -31,12 +31,12 @@ export const CACHE_DIR_NAME = '.cache';
 /** Subdirectory holding one index file per pack. */
 export const INDEX_DIR_NAME = 'index';
 
-/** Subdirectory holding icons extracted and coloured on first use. */
+/** Subdirectory holding icons extracted and colored on first use. */
 export const ICON_DIR_NAME = 'icons';
 
 /**
- * Token used in a cache key when a colour was not specified, meaning the icon
- * inherits the theme's colour via `currentColor`.
+ * Token used in a cache key when a color was not specified, meaning the icon
+ * inherits the theme's color via `currentColor`.
  */
 export const NO_COLOR = 'none';
 
@@ -76,7 +76,7 @@ export function iconCacheDir(iconPacksPath: string): string {
 /**
  * Reduces a value to characters that are safe in a filename on every platform.
  *
- * Cache keys are built out of pack names, folder names and colours, all of
+ * Cache keys are built out of pack names, folder names and colors, all of
  * which are user supplied, so this is the single point where that input is made
  * safe to concatenate into a path.
  */
@@ -91,11 +91,11 @@ export function sanitizeKeyPart(value: string): string {
 }
 
 /**
- * Normalizes a colour into a cache key token.
+ * Normalizes a color into a cache key token.
  *
- * @param color A CSS colour, with or without a leading `#`. Anything empty
- * means "no explicit colour".
- * @returns The colour without its `#`, or {@link NO_COLOR}.
+ * @param color A CSS color, with or without a leading `#`. Anything empty
+ * means "no explicit color".
+ * @returns The color without its `#`, or {@link NO_COLOR}.
  */
 export function colorToken(color: string | null | undefined): string {
   if (!color) {
@@ -108,16 +108,16 @@ export function colorToken(color: string | null | undefined): string {
 /**
  * Identifies one rendered form of one icon.
  *
- * Colour is part of the key because the cache stores icons exactly as they are
- * drawn. The same source icon in two colours is two cache entries, and neither
+ * Color is part of the key because the cache stores icons exactly as they are
+ * drawn. The same source icon in two colors is two cache entries, and neither
  * has to be recomputed once written.
  */
 export interface CacheKeyParts {
   /** Name of the icon pack the icon came from. */
   library: string;
-  /** Foreground colour, or nullish to inherit from the theme. */
+  /** Foreground color, or nullish to inherit from the theme. */
   foreground?: string | null;
-  /** Background colour, or nullish for none. */
+  /** Background color, or nullish for none. */
   background?: string | null;
   /** Folder the icon sits in inside its pack, relative to the pack root. */
   folder?: string;
@@ -129,7 +129,7 @@ export interface CacheKeyParts {
  * Builds the filename of a cached icon.
  *
  * The shape is `library-foreground-background-folder-name.svg`, so a cached
- * file says on its face which pack, colour and folder it came from. That keeps
+ * file says on its face which pack, color and folder it came from. That keeps
  * the cache browsable and makes stale entries easy to spot by eye.
  *
  * @example `game-icons.net.svg-ffffff-none-lorc-sandstorm.svg`

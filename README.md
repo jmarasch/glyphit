@@ -26,9 +26,9 @@ lorc/sandstorm.svg       ->  GiLorcSandstorm         (ambiguous, qualified)
 delapouite/sandstorm.svg ->  GiDelapouiteSandstorm
 ```
 
-**Colour is applied at render time.** Icons that hard-code their colour on the
-shapes rather than the root element are recoloured correctly, so a single pack
-covers every colour instead of needing one copy per colour.
+**Color is applied at render time.** Icons that hard-code their color on the
+shapes rather than the root element are recolored correctly, so a single pack
+covers every color instead of needing one copy per color.
 
 **Packs can be rescanned.** Edit a pack's `.zip` or folder, then hit the rescan
 button next to it in settings to pick the change up without restarting Obsidian.
@@ -72,14 +72,14 @@ Without `env.js` the build still works, it just does not copy anywhere.
 
 ### Other commands
 
-| Command | Does |
-| --- | --- |
-| `npm run build` | Production build, no source maps |
-| `npm test` | Run the test suite |
-| `npm run test:coverage` | Tests with coverage thresholds |
-| `npm run lint` | ESLint with `--fix` |
-| `npm run prettify` | Format with Prettier |
-| `npm run docs:dev` | Serve the VitePress docs |
+| Command                 | Does                             |
+| ----------------------- | -------------------------------- |
+| `npm run build`         | Production build, no source maps |
+| `npm test`              | Run the test suite               |
+| `npm run test:coverage` | Tests with coverage thresholds   |
+| `npm run lint`          | ESLint with `--fix`              |
+| `npm run prettify`      | Format with Prettier             |
+| `npm run docs:dev`      | Serve the VitePress docs         |
 
 ## Licence
 

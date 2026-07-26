@@ -79,7 +79,7 @@ describe('index + cache + resolve', () => {
     ]);
   });
 
-  it('should put the chosen colour in the cache filename', async () => {
+  it('should put the chosen color in the cache filename', async () => {
     await resolver.resolve(requestFor('GiSandstorm', '#FF8800'));
 
     expect(await cache.list()).toEqual([
@@ -87,7 +87,7 @@ describe('index + cache + resolve', () => {
     ]);
   });
 
-  it('should cache each colour of an icon separately', async () => {
+  it('should cache each color of an icon separately', async () => {
     await resolver.resolve(requestFor('GiSandstorm'));
     await resolver.resolve(requestFor('GiSandstorm', '#ff8800'));
     await resolver.resolve(requestFor('GiSandstorm', '#0088ff'));
@@ -99,7 +99,7 @@ describe('index + cache + resolve', () => {
     ]);
   });
 
-  it('should apply the colour to the cached markup', async () => {
+  it('should apply the color to the cached markup', async () => {
     await resolver.resolve(requestFor('GiSandstorm', '#ff8800'));
 
     const cached = await fs.read(

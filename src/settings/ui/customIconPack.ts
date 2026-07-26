@@ -6,6 +6,11 @@ import icon from '@app/lib/icon';
 import { LucideIconPackType } from '../data';
 import { LUCIDE_ICON_PACK_NAME } from '@app/icon-pack-manager/lucide';
 import { IconPack } from '@app/icon-pack-manager';
+import { IconPackSourceType } from '@app/icon-pack-manager/types';
+import {
+  revealInFileBrowser,
+  canRevealInFileBrowser,
+} from '@app/lib/util/reveal';
 
 export default class CustomIconPackSetting extends GlyphItSetting {
   private textComponent: TextComponent;
@@ -13,6 +18,9 @@ export default class CustomIconPackSetting extends GlyphItSetting {
   private closeTimer: NodeJS.Timeout;
   private dragTargetElement: HTMLElement;
   private refreshDisplay: () => void;
+
+  /** Style used for the next pack created from the settings page. */
+  private newPackStyle: IconPackSourceType = 'zip';
 
   constructor(
     plugin: GlyphItPlugin,
@@ -73,79 +81,88 @@ export default class CustomIconPackSetting extends GlyphItSetting {
    * @returns How many icons were added.
    */
   private async addIcons(iconPack: IconPack, files: File[]): Promise<number> {
-    if (!iconPack.isCustomPack()) {
-      new Notice(
-        `${iconPack.getName()} is a zipped icon pack. Add the SVGs to the .zip file, then use the rescan button.`,
-        8000,
-      );
-      return 0;
-    }
-
-    const iconPackManager = this.plugin.getIconPackManager();
-    const folder = `${iconPackManager.getPath()}/${iconPack.getName()}`;
-    let added = 0;
+    const svgs: { name: string; content: string }[] = [];
 
     for (const file of files) {
-      const content = await readFileSync(file);
-      const filename = file.name.endsWith('.svg')
-        ? file.name
-        : `${file.name}.svg`;
+      svgs.push({ name: file.name, content: await readFileSync(file) });
+    }
 
-      try {
-        await this.plugin.app.vault.adapter.write(
-          `${folder}/${filename}`,
-          content,
+    try {
+      // The manager handles both storage styles, and rejects anything that is
+      // not actually an SVG.
+      const { added, rejected } = await this.plugin
+        .getIconPackManager()
+        .addIconsToPack(iconPack, svgs);
+
+      if (rejected.length > 0) {
+        new Notice(
+          `Skipped ${rejected.length} file(s) that are not SVGs: ` +
+            `${rejected.slice(0, 3).join(', ')}${rejected.length > 3 ? '...' : ''}. ` +
+            'Icons must be SVG; convert raster images first.',
+          10000,
         );
-        added++;
-      } catch (error) {
-        new Notice(`Could not add ${file.name}: ${error}`);
       }
-    }
 
-    if (added > 0) {
-      // Re-index so the new files are addressable, and so any name collisions
-      // they introduced are resolved consistently with the rest of the pack.
-      await iconPackManager.refreshIconPack(iconPack.getName());
+      return added;
+    } catch (error) {
+      new Notice(`Could not add icons to ${iconPack.getName()}: ${error}`);
+      return 0;
     }
-
-    return added;
   }
 
   public display(): void {
     new Setting(this.containerEl)
       .setName('Add custom icon pack')
-      .setDesc('Add a custom icon pack.')
+      .setDesc(
+        'Create an empty icon pack. Archive packs keep every icon in one ' +
+          'file, which is much kinder to file sync and directory watchers; ' +
+          'folder packs are easier to edit by hand.',
+      )
       .addText((text) => {
         text.setPlaceholder('Your icon pack name');
         this.textComponent = text;
       })
+      .addDropdown((dropdown) => {
+        dropdown.addOptions({
+          zip: 'Archive (.zip)',
+          folder: 'Folder',
+        } satisfies Record<IconPackSourceType, string>);
+        dropdown.setValue(this.newPackStyle);
+        dropdown.onChange((value: IconPackSourceType) => {
+          this.newPackStyle = value;
+        });
+      })
       .addButton((btn) => {
-        btn.setButtonText('Add icon pack');
+        btn.setIcon('plus');
+        btn.setTooltip('Create the icon pack');
         btn.onClick(async () => {
           const name = this.textComponent.getValue();
           if (name.length === 0) {
             return;
           }
 
-          const normalizedName = this.normalizeIconPackName(
-            this.textComponent.getValue(),
-          );
+          const normalizedName = this.normalizeIconPackName(name);
+          const iconPackManager = this.plugin.getIconPackManager();
 
           if (
-            await this.plugin
-              .getIconPackManager()
-              .doesIconPackExist(normalizedName)
+            (await iconPackManager.doesIconPackExist(normalizedName)) ||
+            iconPackManager.getIconPackByName(normalizedName)
           ) {
             new Notice('Icon pack already exists.');
             return;
           }
 
-          await this.plugin
-            .getIconPackManager()
-            .createCustomIconPackDirectory(normalizedName);
+          await iconPackManager.createIconPack(
+            normalizedName,
+            this.newPackStyle,
+          );
           this.textComponent.setValue('');
           this.refreshDisplay();
-          new Notice('Icon pack successfully created.');
+          new Notice(
+            `Icon pack created as ${
+              this.newPackStyle === 'zip' ? 'an archive' : 'a folder'
+            }.`,
+          );
         });
       });
 
@@ -205,6 +222,28 @@ export default class CustomIconPackSetting extends GlyphItSetting {
           new Notice(`${iconPack.getName()}: ${count} icons.`);
         });
       });
+      // Icon packs are meant to be edited outside the app, and they live in a
+      // hidden directory that is awkward to reach by hand.
+      if (canRevealInFileBrowser(this.plugin.app)) {
+        iconPackSetting.addButton((btn) => {
+          btn.setIcon('folder-open');
+          btn.setTooltip(
+            iconPack.getSource().type === 'zip'
+              ? 'Show this icon pack archive in the file browser'
+              : 'Show this icon pack folder in the file browser',
+          );
+          btn.onClick(() => {
+            const location = this.plugin
+              .getIconPackManager()
+              .getPackLocation(iconPack);
+
+            if (!revealInFileBrowser(this.plugin.app, location)) {
+              new Notice('Could not open the file browser.');
+            }
+          });
+        });
+      }
+
       // iconPackSetting.addButton((btn) => {
       //   btn.setIcon('broken-link');
       //   btn.setTooltip('Try to fix icon pack');
@@ -276,7 +315,11 @@ export default class CustomIconPackSetting extends GlyphItSetting {
 
       iconPackSetting.addButton((btn) => {
         btn.setIcon('plus');
-        btn.setTooltip('Add an icon');
+        btn.setTooltip(
+          iconPack.getSource().type === 'zip'
+            ? 'Add SVG files into this archive'
+            : 'Add SVG files to this folder',
+        );
         btn.onClick(async () => {
           const fileSelector = document.createElement('input');
           fileSelector.setAttribute('type', 'file');
@@ -296,7 +339,10 @@ export default class CustomIconPackSetting extends GlyphItSetting {
       });
       iconPackSetting.addButton((btn) => {
         btn.setIcon('trash');
-        btn.setTooltip('Remove the icon pack');
+        btn.setWarning();
+        btn.setTooltip(
+          'Remove the icon pack. Icons already in use keep working, but this pack can no longer be browsed.',
+        );
         btn.onClick(async () => {
           await this.plugin.getIconPackManager().removeIconPack(iconPack);
           this.refreshDisplay();

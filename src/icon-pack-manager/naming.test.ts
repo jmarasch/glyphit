@@ -109,7 +109,7 @@ describe('resolveEntryIds', () => {
 
   it('should qualify parallel variant trees by the variant segment alone', () => {
     // The real pack ships every icon twice, under a black and a white tree.
-    // Only the colour segment differs, so only it should reach the name.
+    // Only the color segment differs, so only it should reach the name.
     const result = resolveEntryIds(
       'Gi',
       entries(

@@ -47,7 +47,6 @@ import {
   processIconInTextMarkdown,
   processIconInLinkMarkdown,
 } from './editor/markdown-processors';
-import ChangeColorModal from './ui/change-color-modal';
 import { logger } from './lib/logger';
 import { EventEmitter } from './lib/event/event';
 import GlyphItAPI, { getApi } from './lib/api';
@@ -60,7 +59,13 @@ import {
 
 export interface FolderIconObject {
   iconName: string | null;
+  /** Color the icon is drawn in. `undefined` means it follows the theme. */
   iconColor?: string;
+  /**
+   * Color drawn behind the icon. `undefined` means none, which is the usual
+   * case; a background is mainly useful for making pale icons legible.
+   */
+  iconBackgroundColor?: string;
 }
 
 export default class GlyphItPlugin extends Plugin {
@@ -129,11 +134,19 @@ export default class GlyphItPlugin extends Plugin {
     // compressed; only their table of contents is read here.
     await this.iconPackManager.init();
 
+    const usedIcons = this.getUsedIcons();
+
     // Extracts just the icons this vault actually refers to, so the
     // synchronous render paths can find them without opening any archive.
-    // Colour is applied per node when the icon is drawn, so the uncoloured
+    // Color is applied per node when the icon is drawn, so the uncolored
     // form is all that has to be in memory.
-    await this.iconPackManager.prefetch([...this.getUsedIcons()]);
+    await this.iconPackManager.prefetch([...usedIcons]);
+
+    // Removed packs leave their index and cached icons behind so that icons
+    // still applied keep working. Once nothing refers to them, that data and
+    // any stale entries in the recently used list are released.
+    await this.iconPackManager.pruneDetachedPacks(usedIcons);
+    await this.pruneRecentlyUsedIcons();
 
     this.app.workspace.onLayoutReady(() => this.handleChangeLayout());
 
@@ -254,15 +267,6 @@ export default class GlyphItPlugin extends Plugin {
           });
         };
 
-        const changeColorOfIcon = (item: MenuItem) => {
-          item.setTitle('Change color of icon');
-          item.setIcon('palette');
-          item.onClick(() => {
-            const modal = new ChangeColorModal(this.app, this, file.path);
-            modal.open();
-          });
-        };
-
         menu.addItem(addIconMenuItem);
 
         const filePathData = this.getData()[file.path];
@@ -271,18 +275,12 @@ export default class GlyphItPlugin extends Plugin {
           (filePathData as FolderIconObject).iconName !== null;
         // Only add remove icon menu item when the file path exists in the data.
         // We do not want to show this menu item for e.g. custom rules.
+        // Only offer removal when the path actually has an icon of its own.
+        // Icons that come from a custom rule are not the file's to remove.
         if (
           filePathData &&
           (typeof filePathData === 'string' || hasNestedIcon)
         ) {
-          const icon =
-            typeof filePathData === 'string'
-              ? filePathData
-              : (filePathData as FolderIconObject).iconName;
-          if (!emoji.isEmoji(icon)) {
-            menu.addItem(changeColorOfIcon);
-          }
-
           menu.addItem(removeIconMenuItem);
         }
       }),
@@ -652,6 +650,7 @@ export default class GlyphItPlugin extends Plugin {
 
             dom.createIconNode(this, file.path, newIconName, {
               color: iconColor,
+              backgroundColor: this.getIconBackgroundColor(file.path),
             });
             this.addFolderIcon(file.path, newIconName);
             this.addIconColor(file.path, iconColor);
@@ -789,6 +788,42 @@ export default class GlyphItPlugin extends Plugin {
     this.savePluginData();
   }
 
+  addIconBackgroundColor(path: string, iconBackgroundColor: string): void {
+    const pathData = this.getData()[path];
+
+    if (typeof pathData === 'string') {
+      this.getData()[path] = {
+        iconName: pathData,
+        iconBackgroundColor,
+      };
+    } else {
+      (pathData as FolderIconObject).iconBackgroundColor = iconBackgroundColor;
+    }
+
+    this.savePluginData();
+  }
+
+  getIconBackgroundColor(path: string): string | undefined {
+    const pathData = this.getData()[path];
+
+    if (!pathData || typeof pathData === 'string') {
+      return undefined;
+    }
+
+    return (pathData as FolderIconObject).iconBackgroundColor;
+  }
+
+  removeIconBackgroundColor(path: string): void {
+    const pathData = this.getData()[path];
+
+    if (typeof pathData === 'string') {
+      return;
+    }
+
+    delete (pathData as FolderIconObject).iconBackgroundColor;
+    this.savePluginData();
+  }
+
   getIconColor(path: string): string | undefined {
     const pathData = this.getData()[path];
 
@@ -891,6 +926,35 @@ export default class GlyphItPlugin extends Plugin {
 
   async savePluginData(): Promise<void> {
     await this.saveData(this.data);
+  }
+
+  /**
+   * Drops recently used icons whose pack is no longer installed.
+   *
+   * They would otherwise linger in the picker as entries with a name but no
+   * icon, since a removed pack is no longer somewhere new icons can come from.
+   */
+  async pruneRecentlyUsedIcons(): Promise<void> {
+    const recent = this.getSettings().recentlyUsedIcons;
+    const kept = recent.filter((iconName) => {
+      if (emoji.isEmoji(iconName)) {
+        return true;
+      }
+
+      const located = this.iconPackManager.findEntry(iconName);
+      return (
+        located !== undefined &&
+        this.iconPackManager.isPackInstalled(located.pack.getName())
+      );
+    });
+
+    if (kept.length !== recent.length) {
+      logger.info(
+        `Dropped ${recent.length - kept.length} recently used icon(s) whose pack is no longer installed`,
+      );
+      this.getSettings().recentlyUsedIcons = kept;
+      await this.savePluginData();
+    }
   }
 
   async checkRecentlyUsedIcons(): Promise<void> {

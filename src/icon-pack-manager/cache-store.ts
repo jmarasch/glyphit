@@ -17,8 +17,8 @@ import {
  * first time an icon is used it is written out here as a plain `.svg` file and
  * every later read is a direct file read.
  *
- * Entries are keyed by pack, colour and folder (see {@link cacheKey}), which
- * means a recoloured icon is a new entry rather than an overwrite, and the same
+ * Entries are keyed by pack, color and folder (see {@link cacheKey}), which
+ * means a recolored icon is a new entry rather than an overwrite, and the same
  * filename in two pack folders never collides.
  */
 export class IconCacheStore {
@@ -131,9 +131,9 @@ export class IconCacheStore {
   }
 
   /**
-   * Drops every cached form of a single icon, in every colour it was drawn in.
+   * Drops every cached form of a single icon, in every color it was drawn in.
    *
-   * Colour is part of the cache key, so one icon can have several files. They
+   * Color is part of the cache key, so one icon can have several files. They
    * are matched positionally rather than by parsing: the library is the first
    * field and the folder and name are the last two, and no field value can
    * contain the `-` separator.
@@ -172,11 +172,11 @@ export class IconCacheStore {
   }
 
   /**
-   * The colour-independent identity of an icon's cache entries.
+   * The color-independent identity of an icon's cache entries.
    *
    * Cache filenames are `library-fg-bg-folder-name.svg`; this returns the
-   * `library` and `-folder-name` parts that every colour of one icon shares, so
-   * entries can be grouped without parsing colours back out.
+   * `library` and `-folder-name` parts that every color of one icon shares, so
+   * entries can be grouped without parsing colors back out.
    */
   public identityOf(
     library: string,
@@ -203,7 +203,7 @@ export class IconCacheStore {
       return null;
     }
 
-    // library-fg-bg-folder-name.svg: the colours are always fields 1 and 2.
+    // library-fg-bg-folder-name.svg: the colors are always fields 1 and 2.
     const library = fields[0];
     const rest = fields.slice(3).join('-');
     return `${library}|${rest}`;

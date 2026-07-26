@@ -11,13 +11,25 @@ import { IconPack } from './icon-pack';
 import { isReservedDirectory } from './layout';
 import { LUCIDE_ICON_PACK_NAME, LucideIconPack } from './lucide';
 import { nextIdentifier } from './naming';
-import { IconResolver, ResolveRequest } from './resolver';
-import { Icon, IconEntry } from './types';
+import { IconResolver, ResolveOptions, ResolveRequest } from './resolver';
+import { Icon, IconEntry, IconPackSourceType } from './types';
+import { NullSource } from './null-source';
 import { ZipSource } from './zip-source';
+import { addFilesToZip, createEmptyZip } from './zip-writer';
 import { getExtraPath } from '@app/icon-packs';
 
 export { Icon, IconEntry } from './types';
 export { IconPack } from './icon-pack';
+
+/**
+ * Outcome of adding icons to a pack.
+ */
+export interface AddIconsResult {
+  /** How many icons were written. */
+  added: number;
+  /** Filenames that were not SVGs, and so were skipped. */
+  rejected: string[];
+}
 
 /**
  * An icon located in the pack it belongs to.
@@ -40,6 +52,16 @@ export class IconPackManager {
   private path: string;
 
   private iconPacks: IconPack[] = [];
+
+  /**
+   * Packs that are no longer installed but whose icons are still in use.
+   *
+   * Uninstalling a pack removes it as a place to find new icons; it does not
+   * take away icons already applied in the vault. Their index and cached files
+   * are kept, so they still render — they simply cannot be browsed or added to
+   * any more.
+   */
+  private detachedPacks: IconPack[] = [];
 
   private readonly fs: FileSystem;
   private readonly indexStore: IndexStore;
@@ -121,6 +143,7 @@ export class IconPackManager {
     await Promise.all(this.iconPacks.map((pack) => this.loadIndex(pack)));
 
     await this.adoptShadowedFolders(shadowedFolders);
+    await this.loadDetachedPacks();
 
     // Nothing needs the archives again until an icon is actually resolved.
     this.releaseSources();
@@ -166,6 +189,70 @@ export class IconPackManager {
       } else {
         this.iconPacks.push(replacement);
       }
+    }
+  }
+
+  /**
+   * Forgets detached packs that nothing refers to any more.
+   *
+   * A detached pack only exists to keep icons that are still applied working.
+   * Once none of its icons are referenced there is nothing left to preserve,
+   * so its index and cached files are released rather than kept forever.
+   *
+   * @param referenced Every icon identifier the vault still uses.
+   * @returns The names of the packs that were dropped.
+   */
+  public async pruneDetachedPacks(referenced: Set<string>): Promise<string[]> {
+    const dropped: string[] = [];
+
+    for (const pack of [...this.detachedPacks]) {
+      const stillUsed = pack
+        .getEntries()
+        .some((entry) => referenced.has(entry.id));
+
+      if (stillUsed) {
+        continue;
+      }
+
+      const name = pack.getName();
+      this.detachedPacks = this.detachedPacks.filter((p) => p !== pack);
+      this.resolver.forgetLibrary(name);
+      await this.cacheStore.removeForLibrary(name);
+      await this.indexStore.delete(name);
+      dropped.push(name);
+
+      logger.info(
+        `Released data for removed icon pack '${name}'; none of its icons are in use`,
+      );
+    }
+
+    return dropped;
+  }
+
+  /**
+   * Loads the indexes of packs that are indexed but no longer installed.
+   */
+  private async loadDetachedPacks(): Promise<void> {
+    this.detachedPacks = [];
+    const installed = new Set(this.iconPacks.map((pack) => pack.getName()));
+
+    for (const name of await this.indexStore.listIndexedPacks()) {
+      if (installed.has(name)) {
+        continue;
+      }
+
+      const stored = await this.indexStore.load(name);
+      if (!stored || stored.entries.length === 0) {
+        continue;
+      }
+
+      const pack = new IconPack(name, new NullSource(), false, stored.prefix);
+      pack.setIndex(stored);
+      this.detachedPacks.push(pack);
+
+      logger.info(
+        `Icon pack '${name}' is no longer installed; ${stored.entries.length} of its icons remain resolvable from the cache`,
+      );
     }
   }
 
@@ -257,13 +344,20 @@ export class IconPackManager {
     const prefix = iconNameWithPrefix.substring(0, split);
     const name = iconNameWithPrefix.substring(split);
 
-    const pack = this.getIconPackByPrefix(prefix);
-    if (!pack) {
-      return undefined;
+    // Installed packs first, then packs that were uninstalled while some of
+    // their icons were still in use.
+    for (const pack of [...this.iconPacks, ...this.detachedPacks]) {
+      if (pack.getPrefix() !== prefix) {
+        continue;
+      }
+
+      const entry = pack.getEntry(name) ?? pack.getEntry(iconNameWithPrefix);
+      if (entry) {
+        return { pack, entry };
+      }
     }
 
-    const entry = pack.getEntry(name) ?? pack.getEntry(iconNameWithPrefix);
-    return entry ? { pack, entry } : undefined;
+    return undefined;
   }
 
   /**
@@ -299,8 +393,8 @@ export class IconPackManager {
 
     return (
       this.resolver.peek(this.requestFor(located, color)) ??
-      // Fall back to the uncoloured form, which is the same drawing; the DOM
-      // layer applies colour again when it sets the icon.
+      // Fall back to the uncolored form, which is the same drawing; the DOM
+      // layer applies color again when it sets the icon.
       (color ? this.resolver.peek(this.requestFor(located)) : undefined)
     );
   }
@@ -311,13 +405,14 @@ export class IconPackManager {
   public async resolveIcon(
     iconNameWithPrefix: string,
     color?: string | null,
+    options: ResolveOptions = {},
   ): Promise<Icon | null> {
     const located = this.findEntry(iconNameWithPrefix);
     if (!located) {
       return null;
     }
 
-    return this.resolver.resolve(this.requestFor(located, color));
+    return this.resolver.resolve(this.requestFor(located, color), options);
   }
 
   /**
@@ -327,7 +422,7 @@ export class IconPackManager {
    * what allows the synchronous render path to find everything it needs.
    *
    * @param iconNames Full icon identifiers.
-   * @param colorOf Optional lookup of the colour each icon should be drawn in.
+   * @param colorOf Optional lookup of the color each icon should be drawn in.
    */
   public async prefetch(
     iconNames: string[],
@@ -440,18 +535,101 @@ export class IconPackManager {
   }
 
   /**
-   * Creates an empty pack directory for the user to drop SVGs into.
+   * Creates an empty icon pack for the user to fill.
+   *
+   * @param name Pack name, which becomes its folder or archive name.
+   * @param style `folder` keeps icons as loose files, which is easiest to edit
+   * by hand. `zip` keeps them in a single archive, which is far kinder to file
+   * syncing and to directory watchers when the pack holds thousands of icons.
    */
-  public async createCustomIconPackDirectory(dir: string): Promise<IconPack> {
+  public async createIconPack(
+    name: string,
+    style: IconPackSourceType = 'folder',
+  ): Promise<IconPack> {
     await this.createDefaultDirectory();
-    const folder = joinPath(this.path, dir);
-    await ensureDirectory(this.fs, folder);
 
-    const pack = new IconPack(dir, new FolderSource(this.fs, folder), true);
+    let pack: IconPack;
+
+    if (style === 'zip') {
+      const zipPath = joinPath(this.path, `${name}.zip`);
+      await createEmptyZip(this.fs, zipPath);
+      pack = new IconPack(name, new ZipSource(this.fs, zipPath), true);
+    } else {
+      const folder = joinPath(this.path, name);
+      await ensureDirectory(this.fs, folder);
+      pack = new IconPack(name, new FolderSource(this.fs, folder), true);
+    }
+
     this.iconPacks.push(pack);
     await this.loadIndex(pack, true);
 
     return pack;
+  }
+
+  /**
+   * Where a pack lives on disk: its archive, or its directory.
+   */
+  public getPackLocation(pack: IconPack): string {
+    return pack.getSource().type === 'zip'
+      ? joinPath(this.path, `${pack.getName()}.zip`)
+      : joinPath(this.path, pack.getName());
+  }
+
+  /**
+   * Adds SVG files to a pack, whichever way it stores them, and re-indexes it.
+   *
+   * @param pack Pack to add to.
+   * @param files Filenames and SVG markup to write.
+   * @returns How many icons were added.
+   */
+  public async addIconsToPack(
+    pack: IconPack,
+    files: { name: string; content: string }[],
+  ): Promise<AddIconsResult> {
+    // Validated here rather than at each call site: a file dialog's `accept`
+    // is only a hint, so anything can arrive. Content is checked instead of
+    // the extension, which catches a mislabelled file as well as a raster one
+    // renamed to `.svg`. Writing those through would put unusable files in the
+    // pack and report them as added.
+    const rejected: string[] = [];
+    const accepted = files.filter((file) => {
+      if (/<svg[\s>]/i.test(file.content)) {
+        return true;
+      }
+      rejected.push(file.name);
+      return false;
+    });
+
+    const named = accepted.map((file) => ({
+      path: file.name.toLowerCase().endsWith('.svg')
+        ? file.name
+        : `${file.name}.svg`,
+      content: file.content,
+    }));
+
+    if (named.length === 0) {
+      return { added: 0, rejected };
+    }
+
+    const location = this.getPackLocation(pack);
+
+    if (pack.getSource().type === 'zip') {
+      // The archive is rewritten, so anything holding it open must let go
+      // first or it would keep serving the previous contents.
+      pack.getSource().dispose();
+      await addFilesToZip(this.fs, location, named);
+    } else {
+      await ensureDirectory(this.fs, location);
+      for (const file of named) {
+        await this.fs.write(joinPath(location, file.path), file.content);
+      }
+    }
+
+    // Re-index so the new icons are addressable and any name collisions they
+    // introduce are resolved consistently with the rest of the pack.
+    await this.refreshIconPack(pack.getName());
+
+    return { added: named.length, rejected };
   }
 
   /**
@@ -474,12 +652,28 @@ export class IconPackManager {
     }
 
     iconPack.dispose();
-    this.resolver.forgetLibrary(name);
-    await this.cacheStore.removeForLibrary(name);
-    await this.indexStore.delete(name);
 
     if (!deleteFiles) {
+      // Being replaced rather than uninstalled, so nothing is retained.
+      this.resolver.forgetLibrary(name);
+      await this.cacheStore.removeForLibrary(name);
+      await this.indexStore.delete(name);
       return;
+    }
+
+    // The pack's own files go, but its index and cached icons stay: anything
+    // already applied in the vault has to keep rendering. The pack is kept as
+    // a detached one so those icons can still be looked up by name.
+    const detached = new IconPack(
+      name,
+      new NullSource(),
+      false,
+      iconPack.getPrefix(),
+    );
+    const stored = await this.indexStore.load(name);
+    if (stored && stored.entries.length > 0) {
+      detached.setIndex(stored);
+      this.detachedPacks.push(detached);
     }
 
     const folder = joinPath(this.path, name);
@@ -598,6 +792,16 @@ export class IconPackManager {
 
   public getIconPacks(): IconPack[] {
     return this.iconPacks;
+  }
+
+  /**
+   * Whether a pack is currently installed, as opposed to detached.
+   *
+   * Detached packs can still resolve icons that are already applied, but they
+   * are not a place to pick new ones from.
+   */
+  public isPackInstalled(name: string): boolean {
+    return this.iconPacks.some((pack) => pack.getName() === name);
   }
 
   public getIconPackByName(name: string): IconPack | undefined {
