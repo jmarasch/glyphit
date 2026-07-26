@@ -17,7 +17,7 @@ export default class ExtraMarginSetting extends GlyphItSetting {
       right: 'Right',
       bottom: 'Bottom',
       left: 'Left',
-    } as Record<keyof ExtraMarginSettings, string>);
+    } satisfies Record<keyof ExtraMarginSettings, string>);
 
     const extraMarginSlider = new SliderComponent(extraMarginSetting.controlEl)
       .setLimits(-24, 24, 1)

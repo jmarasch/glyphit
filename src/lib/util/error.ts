@@ -14,5 +14,6 @@ export const errorMessage = (error: unknown): string => {
     return error;
   }
 
-  return String(error);
+  // Anything else - a rejected promise can carry any value at all.
+  return JSON.stringify(error) ?? 'Unknown error';
 };

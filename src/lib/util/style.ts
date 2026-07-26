@@ -81,9 +81,7 @@ const refreshIconNodes = (
       const fileItem = fileExplorer.view.fileItems[path];
       if (fileItem) {
         const titleEl = getFileItemTitleEl(fileItem);
-        const iconNode = titleEl.querySelector(
-          '.glyphit-icon',
-        ) as HTMLElement | null;
+        const iconNode = titleEl.querySelector<HTMLElement>('.glyphit-icon');
         if (iconNode) {
           const pathValue = plugin.getData()[path];
           const hasIndividualColor =

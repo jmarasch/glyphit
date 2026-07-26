@@ -7,6 +7,7 @@ describe('ConsoleLogger', () => {
 
   beforeEach(() => {
     mockConsole = {
+      debug: vi.fn(),
       log: vi.fn(),
       info: vi.fn(),
       warn: vi.fn(),
@@ -28,7 +29,7 @@ describe('ConsoleLogger', () => {
     const logger = new ConsoleLogger('TestPrefix', true);
     logger.log('Test message', null);
 
-    expect(mockConsole.log).toHaveBeenCalledWith(
+    expect(mockConsole.debug).toHaveBeenCalledWith(
       `TestPrefix: [${now.toISOString()}] LOG: Test message`,
     );
   });
@@ -37,7 +38,7 @@ describe('ConsoleLogger', () => {
     const logger = new ConsoleLogger('TestPrefix', true);
     logger.info('Test message', null);
 
-    expect(mockConsole.info).toHaveBeenCalledWith(
+    expect(mockConsole.debug).toHaveBeenCalledWith(
       `TestPrefix: [${now.toISOString()}] INFO: Test message`,
     );
   });
@@ -84,6 +85,7 @@ describe('ConsoleLogger', () => {
     const logger = new ConsoleLogger('TestPrefix', false);
     logger.log('Test message', null);
 
+    expect(mockConsole.debug).not.toHaveBeenCalled();
     expect(mockConsole.log).not.toHaveBeenCalled();
     expect(mockConsole.info).not.toHaveBeenCalled();
     expect(mockConsole.warn).not.toHaveBeenCalled();
@@ -93,22 +95,22 @@ describe('ConsoleLogger', () => {
   it('should log when logging is enabled after being disabled', () => {
     const logger = new ConsoleLogger('TestPrefix', false);
     logger.log('Test message', null);
-    expect(mockConsole.log).not.toHaveBeenCalled();
+    expect(mockConsole.debug).not.toHaveBeenCalled();
 
     logger.toggleLogging(true);
     logger.log('Test message', null);
 
-    expect(mockConsole.log).toHaveBeenCalledWith(expect.any(String));
+    expect(mockConsole.debug).toHaveBeenCalledWith(expect.any(String));
   });
 
   it('should log when logging is disabled after being enabled', () => {
     const logger = new ConsoleLogger('TestPrefix', true);
     logger.log('Test message', null);
-    expect(mockConsole.log).toHaveBeenCalledWith(expect.any(String));
+    expect(mockConsole.debug).toHaveBeenCalledWith(expect.any(String));
 
     logger.toggleLogging(false);
     logger.log('Test message', null);
 
-    expect(mockConsole.log).toHaveBeenCalledTimes(1);
+    expect(mockConsole.debug).toHaveBeenCalledTimes(1);
   });
 });

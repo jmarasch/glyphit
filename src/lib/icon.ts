@@ -12,6 +12,24 @@ import { logger } from './logger';
 import { Icon } from '@app/icon-pack-manager';
 
 /**
+ * The saved entries that actually assign an icon to a vault path.
+ *
+ * The plugin's data keys icon assignments by path, but the settings object and
+ * the migration marker live in the same map. Both callers used to cast the
+ * whole map, which quietly asserted away those two.
+ */
+const getAssignments = (
+  plugin: GlyphItPlugin,
+): [string, string | FolderIconObject][] =>
+  Object.entries(plugin.getData()).filter(
+    (entry): entry is [string, string | FolderIconObject] =>
+      entry[0] !== 'settings' &&
+      entry[0] !== 'migrated' &&
+      entry[1] !== null &&
+      (typeof entry[1] === 'string' || typeof entry[1] === 'object'),
+  );
+
+/**
  * Collects every icon the vault refers to, from saved paths and custom rules.
  */
 const getReferencedIcons = (
@@ -125,9 +143,14 @@ const addAll = (
           if (typeof filePath === 'string') {
             const tabHeaderLeaf = leaf as TabHeaderLeaf;
             const iconColor = plugin.getIconColor(filePath);
-            iconTabs.add(plugin, filePath, tabHeaderLeaf.tabHeaderInnerIconEl, {
-              iconColor,
-            });
+            void iconTabs.add(
+              plugin,
+              filePath,
+              tabHeaderLeaf.tabHeaderInnerIconEl,
+              {
+                iconColor,
+              },
+            );
           }
         }
       }
@@ -298,4 +321,5 @@ export default {
   getIconByPath,
   getIconByName,
   checkMissingIcons,
+  getAssignments,
 };

@@ -60,7 +60,7 @@ export default class OutlineInternalPlugin extends InternalPluginInjector {
         let trimmedLength = 0;
         for (const code of [...text.matchAll(iconShortcodeRegex)]
           .sort((a, b) => a.index - b.index)
-          .map((arr) => ({ text: arr[0], index: arr.index! }))) {
+          .map((arr) => ({ text: arr[0], index: arr.index }))) {
           const shortcode = code.text;
           const iconName = shortcode.slice(
             iconIdentifierLength,

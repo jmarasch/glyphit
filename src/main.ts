@@ -11,6 +11,7 @@ import {
   EditorWithEditorComponent,
   ExplorerView,
   InlineTitleView,
+  MarkdownModeView,
   TabHeaderLeaf,
 } from './@types/obsidian';
 import IconsPickerModal from './ui/icons-picker-modal';
@@ -48,6 +49,7 @@ import {
   processIconInLinkMarkdown,
 } from './editor/markdown-processors';
 import { logger } from './lib/logger';
+import { errorMessage } from './lib/util/error';
 import { EventEmitter } from './lib/event/event';
 import GlyphItAPI, { getApi } from './lib/api';
 import { Icon, IconPackManager } from './icon-pack-manager';
@@ -68,11 +70,19 @@ export interface FolderIconObject {
   iconBackgroundColor?: string;
 }
 
+/**
+ * The plugin's saved data.
+ *
+ * Mostly a map of vault path to the icon assigned there, alongside the
+ * settings object and the migration marker.
+ */
+export type GlyphItData = Record<
+  string,
+  boolean | string | GlyphItSettings | FolderIconObject
+>;
+
 export default class GlyphItPlugin extends Plugin {
-  private data: Record<
-    string,
-    boolean | string | GlyphItSettings | FolderIconObject
-  >;
+  private data: GlyphItData;
   private registeredFileExplorers = new Set<ExplorerView>();
 
   private modifiedInternalPlugins: InternalPluginInjector[] = [];
@@ -163,7 +173,8 @@ export default class GlyphItPlugin extends Plugin {
         const file = editor.editorComponent?.file;
         if (!file) {
           logger.warn(
-            `'editor.editorComponent?.file' is undefined for file: ${file}`,
+            'No file is associated with the active editor, so there is ' +
+              'nothing to set an icon for.',
           );
           return;
         }
@@ -392,11 +403,7 @@ export default class GlyphItPlugin extends Plugin {
   }
 
   private handleChangeLayout(): void {
-    // Transform data that are objects to single strings.
-    const data = Object.entries(this.data) as [
-      string,
-      string | FolderIconObject,
-    ][];
+    const data = icon.getAssignments(this);
 
     this.modifiedInternalPlugins.forEach((internalPlugin) => {
       if (internalPlugin.enabled) {
@@ -410,11 +417,7 @@ export default class GlyphItPlugin extends Plugin {
       // restore anything whose cached file went missing.
       void (async () => {
         if (this.getSettings().iconsBackgroundCheckEnabled) {
-          const data = Object.entries(this.data) as [
-            string,
-            string | FolderIconObject,
-          ][];
-          await icon.checkMissingIcons(this, data);
+          await icon.checkMissingIcons(this, icon.getAssignments(this));
         }
 
         this.eventEmitter.emit('allIconsLoaded');
@@ -507,8 +510,11 @@ export default class GlyphItPlugin extends Plugin {
               this.app.workspace.getActiveViewOfType(MarkdownView);
             if (activeView) {
               const file = activeView.file;
-              const view = (activeView.leaf.view as any).currentMode
-                .view as InlineTitleView;
+              const view = (activeView.leaf.view as MarkdownModeView)
+                .currentMode?.view;
+              if (!view) {
+                return;
+              }
               const iconNameWithPrefix = icon.getByPath(this, file.path);
               if (!iconNameWithPrefix) {
                 titleIcon.hide(view.inlineTitleEl);
@@ -606,10 +612,14 @@ export default class GlyphItPlugin extends Plugin {
           const iconColorFrontmatterName =
             this.getSettings().iconColorInFrontmatterFieldName;
           if (fileCache?.frontmatter) {
-            const {
-              [iconFrontmatterName]: newIconName,
-              [iconColorFrontmatterName]: newIconColor,
-            } = fileCache.frontmatter;
+            // Frontmatter is whatever the user typed, so both values arrive
+            // untyped and are narrowed before anything is done with them.
+            const frontmatter = fileCache.frontmatter as Record<
+              string,
+              unknown
+            >;
+            const newIconName = frontmatter[iconFrontmatterName];
+            const newIconColor = frontmatter[iconColorFrontmatterName];
             // If `icon` property is empty, we will remove it from the data and remove the icon.
             if (!newIconName) {
               if (this.frontmatterCache.has(file.path)) {
@@ -633,7 +643,8 @@ export default class GlyphItPlugin extends Plugin {
               return;
             }
 
-            let iconColor = newIconColor;
+            // Narrowed by the two guards above: either a string, or absent.
+            let iconColor = newIconColor as string | undefined;
             if (isHexadecimal(iconColor)) {
               iconColor = stringToHex(iconColor);
             }
@@ -652,10 +663,11 @@ export default class GlyphItPlugin extends Plugin {
                 saveIconToIconPack(this, newIconName);
               }
             } catch (e) {
+              const message = errorMessage(e);
               logger.warn(
-                `Something went wrong while saving icon to icon pack (error: ${e})`,
+                `Something went wrong while saving icon to icon pack (error: ${message})`,
               );
-              new Notice(e.message);
+              new Notice(message);
               return;
             }
 
@@ -929,14 +941,21 @@ export default class GlyphItPlugin extends Plugin {
   }
 
   async loadPluginData(): Promise<void> {
-    const data = await this.loadData();
-    if (data) {
-      Object.entries(DEFAULT_SETTINGS).forEach(([k, v]) => {
-        if (data.settings[k] === undefined) {
-          data.settings[k] = v;
+    // Saved data is whatever was on disk, possibly written by an older
+    // version, so it is read untyped and filled in against the defaults.
+    const data = (await this.loadData()) as GlyphItData | null;
+    const settings = data?.settings as unknown as
+      | Record<string, unknown>
+      | undefined;
+
+    if (settings) {
+      for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
+        if (settings[key] === undefined) {
+          settings[key] = value;
         }
-      });
+      }
     }
+
     this.data = Object.assign({ settings: { ...DEFAULT_SETTINGS } }, {}, data);
   }
 
@@ -1038,8 +1057,7 @@ export default class GlyphItPlugin extends Plugin {
           return rules.find((rule) => rule.icon === value);
         }
 
-        v = v as FolderIconObject;
-        if (value === v.iconName) {
+        if (value === (v as FolderIconObject).iconName) {
           return k;
         }
       }

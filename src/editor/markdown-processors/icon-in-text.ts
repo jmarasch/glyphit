@@ -58,13 +58,13 @@ const checkForTextNodes = (
   while (currentNode) {
     if (currentNode.nodeType === Node.TEXT_NODE) {
       const text = currentNode as Text;
-      const textNodes = [...Array.from(text.parentElement!.childNodes)].filter(
+      const textNodes = [...Array.from(text.parentElement.childNodes)].filter(
         (n): n is Text => n instanceof Text,
       );
       for (const text of textNodes) {
         for (const code of [...text.wholeText.matchAll(match)]
           .sort((a, b) => b.index - a.index)
-          .map((arr) => ({ text: arr[0], index: arr.index! }))) {
+          .map((arr) => ({ text: arr[0], index: arr.index }))) {
           if (!text.textContent) {
             continue;
           }

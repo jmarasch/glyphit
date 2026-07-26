@@ -120,6 +120,16 @@ interface InlineTitleView extends ExplorerView {
   inlineTitleEl: HTMLElement;
 }
 
+/**
+ * A markdown leaf's view, which delegates to whichever mode is showing.
+ *
+ * `currentMode` is undocumented but is the only route to the inline title
+ * element, which belongs to the mode rather than to the leaf.
+ */
+interface MarkdownModeView extends View {
+  currentMode?: { view: InlineTitleView };
+}
+
 interface FileItem {
   /**
    * @deprecated After Obsidian 1.2.0, use `selfEl` instead.

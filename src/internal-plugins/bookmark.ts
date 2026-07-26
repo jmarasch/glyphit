@@ -5,7 +5,7 @@ import { BookmarkItem, BookmarkItemValue } from '@app/@types/obsidian';
 import dom from '@lib/util/dom';
 import icon from '@lib/icon';
 import GlyphItPlugin from '@app/main';
-import config from '@app/config';
+import { logger } from '@lib/logger';
 import { DEFAULT_FILE_ICON, DEFAULT_FOLDER_ICON } from '@app/util';
 import { setIconMarkup } from '@app/lib/util/html';
 
@@ -45,7 +45,7 @@ export default class BookmarkInternalPlugin extends InternalPluginInjector {
 
   private setIconOrRemove(filePath: string, node: Element | undefined): void {
     const iconName = icon.getByPath(this.plugin, filePath);
-    let iconNode = node.querySelector('.tree-item-icon') as HTMLElement | null;
+    let iconNode = node.querySelector<HTMLElement>('.tree-item-icon');
     if (!iconName) {
       if (iconNode) {
         // Reset the icon to the default obsidian icon.
@@ -148,15 +148,15 @@ export default class BookmarkInternalPlugin extends InternalPluginInjector {
     if (
       !this.plugin.app.internalPlugins.getPluginById('file-explorer').enabled
     ) {
-      console.info(
-        `[${config.PLUGIN_NAME}/Bookmarks] Skipping bookmark internal plugin registration because file-explorer is not enabled.`,
+      logger.info(
+        '[Bookmarks] Skipping bookmark internal plugin registration because file-explorer is not enabled.',
       );
       return;
     }
 
     if (!this.enabled) {
-      console.info(
-        `[${config.PLUGIN_NAME}/Bookmarks] Skipping bookmark internal plugin registration because it's not enabled.`,
+      logger.info(
+        '[Bookmarks] Skipping bookmark internal plugin registration because it is not enabled.',
       );
       return;
     }

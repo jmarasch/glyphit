@@ -277,7 +277,7 @@ export default class CustomIconPackSetting extends GlyphItSetting {
                 .addCustom();
               await icon.checkMissingIcons(
                 this.plugin,
-                Object.entries(this.plugin.getData()) as any,
+                icon.getAssignments(this.plugin),
               );
             }
 
@@ -328,7 +328,7 @@ export default class CustomIconPackSetting extends GlyphItSetting {
       ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((event) => {
         iconPackSetting.settingEl.addEventListener(
           event,
-          this.preventDefaults,
+          (e) => this.preventDefaults(e),
           false,
         );
       });

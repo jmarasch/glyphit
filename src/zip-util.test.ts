@@ -87,7 +87,7 @@ describe('readZipFile', () => {
     );
 
     const bytes = new ArrayBuffer(0);
-    await expect(readZipFile(bytes)).rejects.toBe('No file was found');
+    await expect(readZipFile(bytes)).rejects.toThrow('No file was found');
   });
 });
 

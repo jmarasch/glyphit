@@ -110,11 +110,16 @@ export default class FrontmatterOptions extends GlyphItSetting {
               const frontmatterIconColorKey =
                 this.plugin.getSettings().iconColorInFrontmatterFieldName;
 
-              const iconName = fileCache.frontmatter?.[frontmatterIconKey];
-              let iconColor = fileCache.frontmatter?.[frontmatterIconColorKey];
+              // Frontmatter holds whatever the user typed, so both values
+              // are narrowed below before anything is done with them.
+              const frontmatter = fileCache.frontmatter as
+                | Record<string, unknown>
+                | undefined;
+              const iconName = frontmatter?.[frontmatterIconKey];
+              const rawIconColor = frontmatter?.[frontmatterIconColorKey];
 
               if (!iconName) {
-                await this.plugin.removeFolderIcon(file.path);
+                this.plugin.removeFolderIcon(file.path);
                 continue;
               }
 
@@ -127,21 +132,21 @@ export default class FrontmatterOptions extends GlyphItSetting {
 
               this.plugin.addFolderIcon(file.path, iconName);
 
-              if (!iconColor) {
-                await this.plugin.removeIconColor(file.path);
+              if (!rawIconColor) {
+                this.plugin.removeIconColor(file.path);
                 continue;
               }
 
-              if (typeof iconColor !== 'string') {
+              if (typeof rawIconColor !== 'string') {
                 const message = `${file.path}\nFrontmatter property type \`${frontmatterIconColorKey}\` has to be of type \`text\`.`;
                 logger.warn(message);
                 new Notice(`[${config.PLUGIN_NAME}]\n${message}`);
                 continue;
               }
 
-              iconColor = isHexadecimal(iconColor)
-                ? stringToHex(iconColor)
-                : iconColor;
+              const iconColor = isHexadecimal(rawIconColor)
+                ? stringToHex(rawIconColor)
+                : rawIconColor;
 
               this.plugin.addIconColor(file.path, iconColor);
             }

@@ -39,7 +39,7 @@ export const readZipFile = async (
   const unzippedFiles = await loadAsync(bytes);
   return Promise.resolve(unzippedFiles).then((unzipped) => {
     if (!Object.keys(unzipped.files).length) {
-      return Promise.reject('No file was found');
+      return Promise.reject(new Error('No file was found'));
     }
 
     const files: JSZipObject[] = [];

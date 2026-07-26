@@ -20,7 +20,7 @@ const refreshStyleOfIcons = async (plugin: GlyphItPlugin): Promise<void> => {
     const fileItems = await customRule.getFileItems(plugin, rule);
     for (const fileItem of fileItems) {
       const titleEl = getFileItemTitleEl(fileItem);
-      const iconNode = titleEl.querySelector('.glyphit-icon') as HTMLElement;
+      const iconNode = titleEl.querySelector<HTMLElement>('.glyphit-icon');
       let iconContent = iconNode.innerHTML;
 
       iconContent = style.applyAll(plugin, iconContent, iconNode);

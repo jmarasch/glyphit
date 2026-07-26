@@ -73,7 +73,8 @@ export class IconPackManager {
     private readonly plugin: GlyphItPlugin,
     path: string,
   ) {
-    this.fs = plugin.app.vault.adapter as unknown as FileSystem;
+    // Obsidian's `DataAdapter` already satisfies `FileSystem` structurally.
+    this.fs = plugin.app.vault.adapter;
     this.path = normalizePath(path);
 
     this.indexStore = new IndexStore(this.fs, this.path);
@@ -276,7 +277,7 @@ export class IconPackManager {
       const fingerprint = await pack.getSource().fingerprint();
 
       if (!isIndexStale(stored, fingerprint)) {
-        pack.setIndex(stored!);
+        pack.setIndex(stored);
         return pack.size;
       }
 

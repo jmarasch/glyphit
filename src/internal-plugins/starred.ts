@@ -4,7 +4,7 @@ import InternalPluginInjector from '@app/@types/internal-plugin-injector';
 import { StarredFile } from '@app/@types/obsidian';
 import dom from '@lib/util/dom';
 import icon from '@lib/icon';
-import config from '@app/config';
+import { logger } from '@lib/logger';
 import GlyphItPlugin from '@app/main';
 
 interface StarredView extends View {
@@ -72,7 +72,7 @@ export default class StarredInternalPlugin extends InternalPluginInjector {
     });
 
     Object.entries(nodesWithPath).forEach(([filePath, node]) =>
-      this.setIcon(filePath, node as HTMLElement),
+      this.setIcon(filePath, node),
     );
   }
 
@@ -80,15 +80,15 @@ export default class StarredInternalPlugin extends InternalPluginInjector {
     if (
       !this.plugin.app.internalPlugins.getPluginById('file-explorer').enabled
     ) {
-      console.info(
-        `[${config.PLUGIN_NAME}/Starred] Skipping starred internal plugin registration because file-explorer is not enabled.`,
+      logger.info(
+        '[Starred] Skipping starred internal plugin registration because file-explorer is not enabled.',
       );
       return;
     }
 
     if (!this.enabled) {
-      console.info(
-        `[${config.PLUGIN_NAME}/Starred] Skipping starred internal plugin registration because it's not enabled.`,
+      logger.info(
+        '[Starred] Skipping starred internal plugin registration because it is not enabled.',
       );
       return;
     }

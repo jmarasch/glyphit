@@ -34,6 +34,13 @@ interface Logger {
   toggleLogging(enabled: boolean): void;
 }
 
+/**
+ * Logger that writes to the developer console, and only when switched on.
+ *
+ * `log` and `info` both go to `console.debug`: Obsidian's plugin guidelines
+ * reserve the louder console methods for things a user needs to see, and the
+ * level is already spelled out in the formatted message.
+ */
 export class ConsoleLogger implements Logger {
   private projectPrefix: string;
   private enabled: boolean;
@@ -71,7 +78,7 @@ export class ConsoleLogger implements Logger {
     ...optionalParams: unknown[]
   ): void {
     if (this.enabled) {
-      console.log(
+      console.debug(
         ...this.formatMessage('log', message, prefix, optionalParams),
       );
     }
@@ -83,7 +90,7 @@ export class ConsoleLogger implements Logger {
     ...optionalParams: unknown[]
   ): void {
     if (this.enabled) {
-      console.info(
+      console.debug(
         ...this.formatMessage('info', message, prefix, optionalParams),
       );
     }
