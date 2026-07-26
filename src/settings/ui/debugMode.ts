@@ -4,7 +4,7 @@ import GlyphItSetting from './glyphItSetting';
 export default class DebugMode extends GlyphItSetting {
   public display(): void {
     new Setting(this.containerEl)
-      .setName('Toggle Debug Mode')
+      .setName('Toggle debug mode')
       .setDesc(
         'Toggle debug mode to see more detailed logs in the console. Do not touch this unless you know what you are doing.',
       )

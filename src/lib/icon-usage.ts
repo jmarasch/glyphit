@@ -115,7 +115,7 @@ export async function collectInlineIcons(
     if ((i + 1) % SCAN_BATCH_SIZE === 0) {
       onProgress?.(i + 1, files.length);
       // Lets Obsidian repaint rather than locking up for the whole scan.
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await new Promise((resolve) => window.setTimeout(resolve, 0));
     }
   }
 

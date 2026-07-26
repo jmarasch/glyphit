@@ -27,7 +27,6 @@ export default class IconFontSizeSetting extends GlyphItSetting {
       this.slider = slider;
       slider
         .setLimits(values.min, values.max, values.step)
-        .setDynamicTooltip()
         .setValue(
           this.plugin.getSettings().fontSize ?? DEFAULT_SETTINGS.fontSize,
         )

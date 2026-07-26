@@ -79,7 +79,7 @@ declare module 'obsidian' {
     internalPlugins: {
       plugins: InternalPlugins;
       getPluginById<T extends keyof InternalPlugins>(id: T): InternalPlugins[T];
-      loadPlugin(...args: any[]): any;
+      loadPlugin(...args: unknown[]): unknown;
     };
   }
 }

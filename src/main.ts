@@ -163,12 +163,6 @@ export default class GlyphItPlugin extends Plugin {
     this.addCommand({
       id: 'set-icon-for-file',
       name: 'Set icon for file',
-      hotkeys: [
-        {
-          modifiers: ['Mod', 'Shift'],
-          key: 'j',
-        },
-      ],
       editorCallback: async (editor: EditorWithEditorComponent) => {
         const file = editor.editorComponent?.file;
         if (!file) {
@@ -222,7 +216,7 @@ export default class GlyphItPlugin extends Plugin {
                 );
                 for (const tabLeaf of tabLeaves) {
                   // Add timeout to ensure that the default icon is already set.
-                  setTimeout(() => {
+                  window.setTimeout(() => {
                     void iconTabs.add(
                       this,
                       file.path,
@@ -957,6 +951,15 @@ export default class GlyphItPlugin extends Plugin {
     }
 
     this.data = Object.assign({ settings: { ...DEFAULT_SETTINGS } }, {}, data);
+
+    // The icon packs belong inside whatever the vault actually uses as its
+    // configuration folder, which is user-configurable and need not be
+    // `.obsidian`. Only filled in when unset, so an existing install keeps its
+    // stored path: its packs are already on disk there, and rewriting the
+    // setting would point the plugin at an empty directory.
+    if (!this.getSettings().iconPacksPath) {
+      this.getSettings().iconPacksPath = `${this.app.vault.configDir}/icons`;
+    }
   }
 
   async savePluginData(): Promise<void> {

@@ -30,7 +30,7 @@ export default class EmojiStyleSetting extends GlyphItSetting {
   private async updateDOM(): Promise<void> {
     for (const fileExplorer of this.plugin.getRegisteredFileExplorers()) {
       const fileItems = Object.entries(fileExplorer.fileItems || {});
-      for (const [path, _] of fileItems) {
+      for (const [path] of fileItems) {
         let iconName = this.plugin.getData()[path] as string | undefined | null;
         if (!iconName) {
           continue;

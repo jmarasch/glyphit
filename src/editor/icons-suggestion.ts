@@ -116,10 +116,10 @@ export default class SuggestionIcon extends EditorSuggest<string> {
       return;
     }
 
-    const preview = document.createElement('span');
-    const label = document.createElement('span');
-    label.textContent = value;
-    el.replaceChildren(preview, document.createTextNode(' '), label);
+    el.empty();
+    const preview = el.createSpan();
+    el.appendText(' ');
+    el.createSpan({ text: value });
 
     void dom.setIconForNodeAsync(this.plugin, value, preview, {
       shouldApplyAllStyles: false,

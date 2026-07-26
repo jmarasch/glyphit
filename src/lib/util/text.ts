@@ -67,7 +67,7 @@ const calculateHeaderSize = (header: HTMLHeader | HeaderToken): number => {
 
   // If there is some `calc` operation going on, it has to be evaluated.
   if (headerComputedStyle.includes('calc')) {
-    const temp = document.createElement('div');
+    const temp = createDiv();
 
     temp.style.setProperty('font-size', `var(--${htmlHeader}-size)`);
     document.body.appendChild(temp);

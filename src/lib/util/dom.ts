@@ -210,7 +210,7 @@ const createIconNode = (
     });
   } else {
     // Creates a new icon node and inserts it to the DOM.
-    iconNode = document.createElement('div');
+    iconNode = createDiv();
     iconNode.setAttribute(config.ICON_ATTRIBUTE_NAME, iconName);
     iconNode.classList.add('glyphit-icon');
 

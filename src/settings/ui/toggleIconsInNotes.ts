@@ -7,7 +7,7 @@ export default class ToggleIconsInEditor extends GlyphItSetting {
     new Setting(this.containerEl)
       .setName('Toggle icons while editing notes')
       .setDesc(
-        'Toggles whether you are able to add and see icons in your notes and editor (e.g., ability to have :LiSofa: as an icon in your notes).',
+        'Toggles whether you are able to add and see icons in your notes and editor (e.g., ability to have :lisofa: as an icon in your notes).',
       )
       .addToggle((toggle) => {
         toggle

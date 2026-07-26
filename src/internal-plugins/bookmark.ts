@@ -171,7 +171,7 @@ export default class BookmarkInternalPlugin extends InternalPluginInjector {
           return function (...args) {
             next.call(this, ...args);
             // TODO: Remove in the future, I could not think of a better way to do this.
-            setTimeout(() => {
+            window.setTimeout(() => {
               self.onMount();
             }, 1000);
           };

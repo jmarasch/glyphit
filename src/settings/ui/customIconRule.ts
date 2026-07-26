@@ -109,7 +109,7 @@ export default class CustomIconRuleSetting extends GlyphItSetting {
             unavailable,
           );
         });
-        text.setPlaceholder('regex or simple string');
+        text.setPlaceholder('Regex or simple string');
         this.textComponent = text;
       })
       .addButton((btn) => {

@@ -21,7 +21,6 @@ export default class ExtraMarginSetting extends GlyphItSetting {
 
     const extraMarginSlider = new SliderComponent(extraMarginSetting.controlEl)
       .setLimits(-24, 24, 1)
-      .setDynamicTooltip()
       .setValue(this.plugin.getSettings().extraMargin?.top ?? 2)
       .onChange(async (val) => {
         const dropdownValue =

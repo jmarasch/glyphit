@@ -11,7 +11,8 @@ import { IconPackSourceType } from '@app/icon-pack-manager/types';
 export default class CustomIconPackSetting extends GlyphItSetting {
   private textComponent: TextComponent;
   private dragOverElement: HTMLElement;
-  private closeTimer: NodeJS.Timeout;
+  /** Window timer handle; a number in the browser, not a Node `Timeout`. */
+  private closeTimer: number;
   private dragTargetElement: HTMLElement;
   private refreshDisplay: () => void;
 
@@ -25,7 +26,7 @@ export default class CustomIconPackSetting extends GlyphItSetting {
   ) {
     super(plugin, containerEl);
     this.refreshDisplay = refreshDisplay;
-    this.dragOverElement = document.createElement('div');
+    this.dragOverElement = createDiv();
     this.dragOverElement.addClass('glyphit-dragover-el');
 
     this.dragOverElement.createEl('p', { text: 'Drop to add icon.' });
@@ -41,7 +42,7 @@ export default class CustomIconPackSetting extends GlyphItSetting {
   }
 
   private highlight(el: HTMLElement): void {
-    clearTimeout(this.closeTimer);
+    window.clearTimeout(this.closeTimer);
 
     if (!this.dragTargetElement) {
       el.appendChild(this.dragOverElement);
@@ -57,8 +58,8 @@ export default class CustomIconPackSetting extends GlyphItSetting {
       this.dragTargetElement = undefined;
     }
 
-    clearTimeout(this.closeTimer);
-    this.closeTimer = setTimeout(() => {
+    window.clearTimeout(this.closeTimer);
+    this.closeTimer = window.setTimeout(() => {
       if (this.dragTargetElement) {
         el.removeChild(this.dragOverElement);
         el.classList.remove('glyphit-dragover');
@@ -296,7 +297,7 @@ export default class CustomIconPackSetting extends GlyphItSetting {
             : 'Add SVG files to this folder',
         );
         btn.onClick(async () => {
-          const fileSelector = document.createElement('input');
+          const fileSelector = createEl('input');
           fileSelector.setAttribute('type', 'file');
           fileSelector.setAttribute('multiple', 'multiple');
           fileSelector.setAttribute('accept', '.svg');

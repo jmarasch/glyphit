@@ -21,7 +21,7 @@ export class IconInLinkWidget extends WidgetType {
   }
 
   toDOM() {
-    const iconNode = document.createElement('span');
+    const iconNode = createSpan();
     const iconName =
       typeof this.iconData === 'string'
         ? this.iconData

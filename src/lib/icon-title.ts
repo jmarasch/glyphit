@@ -29,7 +29,7 @@ const add = (
 
   let titleIcon = getTitleIcon(inlineTitleEl.parentElement);
   if (!titleIcon) {
-    titleIcon = document.createElement('div');
+    titleIcon = createDiv();
   }
 
   const isInline =

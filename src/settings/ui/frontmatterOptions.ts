@@ -81,7 +81,7 @@ export default class FrontmatterOptions extends GlyphItSetting {
       .setName('Refresh icons from frontmatter')
       .setClass('glyphit-destructive')
       .setDesc(
-        'Sets the icon and color for each note in the vault based on the frontmatter properties. WARNING: This will change any manually set icons to the one defined in the frontmatter. IF A NOTE HAS NO FRONTMATTER, THE CURRENT ICON WILL BE REMOVED. Please restart Obsidian after this completes to see the changes.',
+        'Sets the icon and color for each note in the vault based on the frontmatter properties. This replaces any manually set icon with the one defined in the frontmatter, and removes the icon from any note that has none. Restart Obsidian after this completes to see the changes.',
       )
       .addButton((btn) => {
         btn

@@ -5,7 +5,7 @@ import config from '@app/config';
 export default class UseInternalPlugins extends GlyphItSetting {
   public display(): void {
     new Setting(this.containerEl)
-      .setName('EXPERIMENTAL: Use internal plugins')
+      .setName('Experimental: Use internal plugins')
       .setDesc(
         'Toggles whether to try to add icons to the bookmark and outline internal plugins.',
       )

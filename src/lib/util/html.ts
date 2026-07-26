@@ -81,7 +81,7 @@ export const parseIconMarkup = (markup: string): DocumentFragment => {
   const parsed = new DOMParser().parseFromString(markup, 'text/html');
   sanitize(parsed.body);
 
-  const fragment = document.createDocumentFragment();
+  const fragment = createFragment();
   for (const node of Array.from(parsed.body.childNodes)) {
     fragment.appendChild(document.importNode(node, true));
   }

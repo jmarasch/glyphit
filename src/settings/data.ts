@@ -72,7 +72,7 @@ export interface GlyphItSettings {
   migrated: number;
   /**
    * Sets the path of where the icon packs are located and stored.
-   * @default '.obsidian/icons'
+   * @default the vault's config folder plus `/icons`
    */
   iconPacksPath: string;
   /**
@@ -190,7 +190,10 @@ export interface GlyphItSettings {
 
 export const DEFAULT_SETTINGS: GlyphItSettings = {
   migrated: 2,
-  iconPacksPath: '.obsidian/icons',
+  // Resolved against the vault's real configuration folder in
+  // `loadPluginData`, because that folder is user-configurable and is not
+  // necessarily `.obsidian`.
+  iconPacksPath: '',
   fontSize: 16,
   emojiStyle: 'native',
   iconColor: null,

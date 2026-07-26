@@ -59,7 +59,9 @@ const checkForTextNodes = (
     if (currentNode.nodeType === Node.TEXT_NODE) {
       const text = currentNode as Text;
       const textNodes = [...Array.from(text.parentElement.childNodes)].filter(
-        (n): n is Text => n instanceof Text,
+        // `.instanceOf` compares against the node's own window, so this
+        // still holds for content in a popout.
+        (n): n is Text => n.instanceOf(Text),
       );
       for (const text of textNodes) {
         for (const code of [...text.wholeText.matchAll(match)]
@@ -133,7 +135,7 @@ export const processIconInTextMarkdown = (
       // We do this after that to not freeze the insertion while iterating over the tree.
       // We are also updating the size after the animation because the styling won't be set
       // in the first place.
-      requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
         const parentFontSize = parseFloat(
           getComputedStyle(parentElement).fontSize,
         );

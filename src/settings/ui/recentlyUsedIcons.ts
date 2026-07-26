@@ -12,7 +12,6 @@ export default class RecentlyUsedIconsSetting extends GlyphItSetting {
       .addSlider((slider) => {
         slider
           .setLimits(1, 25, 1)
-          .setDynamicTooltip()
           .setValue(
             this.plugin.getSettings().recentlyUsedIconsSize ??
               DEFAULT_SETTINGS.recentlyUsedIconsSize,
