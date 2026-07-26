@@ -14,18 +14,18 @@ very large packs stay fast.
 
 Iconize is MIT licensed, and GlyphIt remains MIT licensed. The original
 copyright is retained in [LICENSE](https://github.com/jmarasch/glyphit/blob/main/LICENSE)
-alongside this fork's, as the licence requires.
+alongside this fork's, as the license requires.
 
-Thank you to Florian for building it and for releasing it under a licence that
+Thank you to Florian for building it and for releasing it under a license that
 let the work continue.
 
 ## Icon packs
 
 GlyphIt does not create any icons. The packs it offers are made by other people
-and remain under their own licences — check each project before using its icons
+and remain under their own licenses — check each project before using its icons
 in anything you publish.
 
-| Pack | Project | Licence |
+| Pack | Project | License |
 | --- | --- | --- |
 | Boxicons | [boxicons.com](https://boxicons.com) | MIT |
 | Coolicons | [coolicons.cool](https://coolicons.cool) | CC BY 4.0 |
@@ -40,7 +40,7 @@ in anything you publish.
 | Tabler Icons | [tabler-icons.io](https://tabler-icons.io) | MIT |
 
 Simple Icons ships brand logos. Trademarks belong to their owners, and the CC0
-licence on the artwork does not grant any right to use a brand's marks.
+license on the artwork does not grant any right to use a brand's marks.
 
 Emoji shortcodes use [Twemoji](https://github.com/jdecked/twemoji) when the
 Twemoji style is enabled, which is CC BY 4.0.

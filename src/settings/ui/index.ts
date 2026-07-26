@@ -24,7 +24,7 @@ import UseInternalPlugins from './useInternalPlugins';
  * The settings tab.
  *
  * Grouped by what the user is trying to do rather than by how the code is
- * organised: where icons show up, how they look, where they come from, and the
+ * organized: where icons show up, how they look, where they come from, and the
  * occasional maintenance job. Anything that can destroy work lives at the
  * bottom under its own heading and is marked as such.
  */

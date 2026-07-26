@@ -50,7 +50,7 @@ export default class CacheMaintenanceSetting extends GlyphItSetting {
         setting.setDesc(`Scanning notes... ${scanned} of ${total}`),
     );
 
-    // Cache entries are grouped by icon rather than by colour, so every colour
+    // Cache entries are grouped by icon rather than by color, so every color
     // of an icon that is still used is kept.
     const keep = new Set<string>();
     for (const iconName of referenced) {

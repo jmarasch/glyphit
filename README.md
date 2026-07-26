@@ -88,10 +88,10 @@ by **[Florian Woelki](https://github.com/FlorianWoelki)**, which is no longer
 maintained. Icons on files, folders, tabs, titles and inline text, custom rules,
 frontmatter support and the plugin API all originate from that project.
 
-Icon packs are made by other people and remain under their own licences — see
+Icon packs are made by other people and remain under their own licenses — see
 [CREDITS.md](./CREDITS.md) for the full list.
 
-## Licence
+## License
 
 MIT — see [LICENSE](./LICENSE), which retains the original copyright alongside
-this fork's, as the licence requires.
+this fork's, as the license requires.
